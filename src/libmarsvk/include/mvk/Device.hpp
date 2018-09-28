@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "mvk/QueueFamily.hpp"
+#include "mvk/ShaderModule.hpp"
 
 namespace mvk {
     class PhysicalDevice;
@@ -21,6 +22,7 @@ namespace mvk {
         std::set<std::string> _enabledExtensions;
         std::unique_ptr<QueueFamily[]> _queueFamilies;
         std::uint32_t _queueFamilyCount;
+        std::vector<std::unique_ptr<ShaderModule>> _shaderCache;
 
     public:
         Device() : 
@@ -57,6 +59,12 @@ namespace mvk {
             return _queueFamilyCount;
         }
 
+        inline VkDevice getHandle() const {
+            return _handle;
+        }
+
         std::vector<const QueueFamily *> getQueueFamilies() const;
+
+        ShaderModule * getShaderModule(const ShaderModule::CreateInfo& createInfo);
     };
 }

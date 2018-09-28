@@ -73,7 +73,24 @@ namespace mvk {
     Device::~Device() {
         waitIdle();
 
+        _shaderCache.clear();
+
         vkDestroyDevice(_handle, nullptr);
+    }
+
+    ShaderModule * Device::getShaderModule(const ShaderModule::CreateInfo& createInfo) {
+        for (const auto& module : _shaderCache) {
+            if (module->getInfo() == createInfo) {
+                return module.get();
+            }
+        }
+
+        auto ptr = std::make_unique<ShaderModule> (this, createInfo);
+        auto out = ptr.get();
+
+        _shaderCache.push_back(std::move(ptr));
+
+        return out;
     }
 
     std::vector<const QueueFamily * > Device::getQueueFamilies() const {
