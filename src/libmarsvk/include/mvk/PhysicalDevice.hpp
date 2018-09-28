@@ -2,11 +2,14 @@
 
 #include "volk.h"
 
-#include "mvk/IndexType.hpp"
+#include "mvk/Device.hpp"
 #include "mvk/Format.hpp"
+#include "mvk/IndexType.hpp"
+#include "mvk/PhysicalDeviceType.hpp"
 #include "mvk/Util.hpp"
 #include "mvk/Vendor.hpp"
 
+#include <memory>
 #include <string>
 
 namespace mvk {
@@ -23,6 +26,10 @@ namespace mvk {
             PhysicalDevice(): _handle(VK_NULL_HANDLE) {}
 
             PhysicalDevice(VkPhysicalDevice handle);
+
+            PhysicalDeviceType getPhysicalDeviceType() const;
+
+            std::unique_ptr<Device> createDevice(const std::set<std::string>& enabledExtensions) const;
 
             inline const VkPhysicalDevice getHandle() const {
                 return _handle;
