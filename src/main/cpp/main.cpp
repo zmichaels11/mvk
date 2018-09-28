@@ -36,7 +36,7 @@ void bindMemory(context& ctx, VkBuffer buffer);
 
 std::vector<char> readFile(const std::string& fileName);
 
-int main(int argc, char** argv) {
+int __main(int argc, char** argv) {
     context ctx;
 
     auto inputData = std::vector<float>();

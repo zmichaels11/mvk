@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "mvk/PhysicalDevice.hpp"
 
@@ -18,9 +19,15 @@ namespace mvk {
 
         Instance();
 
+        ~Instance();
+
         Instance(const Instance&) = delete;
 
+        Instance(Instance&&) = default;
+
         Instance& operator= (const Instance&) = delete;
+
+        Instance& operator= (Instance&&) = default;
         
         public:
             static void enableLayer(const std::string& layer);
@@ -44,5 +51,7 @@ namespace mvk {
             inline const PhysicalDevice * getPhysicalDevice(std::ptrdiff_t index) const {
                 return _physicalDevices.get() + index;
             }
+
+            std::vector<const PhysicalDevice *> getPhysicalDevices() const;
     };
 }

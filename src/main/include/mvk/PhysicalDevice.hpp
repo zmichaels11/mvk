@@ -7,6 +7,8 @@
 #include "mvk/Util.hpp"
 #include "mvk/Vendor.hpp"
 
+#include <string>
+
 namespace mvk {
     class PhysicalDevice {
         VkPhysicalDevice _handle;
@@ -18,6 +20,8 @@ namespace mvk {
         bool _hasUniformMemory;
 
         public:
+            PhysicalDevice(): _handle(VK_NULL_HANDLE) {}
+
             PhysicalDevice(VkPhysicalDevice handle);
 
             inline const VkPhysicalDevice getHandle() const {
@@ -113,5 +117,7 @@ namespace mvk {
 
                 return Util::alignDown(size, minSboAlignment);
             }
+
+            std::string toString() const;
     };
 }

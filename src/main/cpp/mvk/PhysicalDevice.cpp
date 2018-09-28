@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <algorithm>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -52,5 +53,21 @@ namespace mvk {
         }
 
         _hasUniformMemory = hasUM;
+    }
+
+    std::string PhysicalDevice::toString() const {
+        auto out = std::stringstream();
+        auto version = _properties.apiVersion;
+        auto major = VK_VERSION_MAJOR(version);
+        auto minor = VK_VERSION_MINOR(version);
+        auto patch = VK_VERSION_PATCH(version);
+
+        out << "PhysicalDevice: {DeviceID=0x" << std::hex << _properties.deviceID
+            << ", VendorID=0x" << std::hex << _properties.vendorID
+            << ", DeviceName=" << _properties.deviceName
+            << ", APIVersion=" << std::dec << major << "." << std::dec << minor << "." << std::dec << patch
+            << "}";
+
+        return out.str();
     }
 }

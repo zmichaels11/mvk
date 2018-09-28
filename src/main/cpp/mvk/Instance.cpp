@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -25,6 +26,10 @@ namespace mvk {
     }
 
     Instance::Instance() {
+        if (VK_SUCCESS != volkInitialize()) {
+            throw std::runtime_error("Volk could not be initialized!");
+        }
+
         VkApplicationInfo applicationInfo {};
 
         applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -35,31 +40,46 @@ namespace mvk {
         
         std::vector<const char *> pEnabledExtensionNames;
 
-        std::for_each(_enabledExtensions.begin(), _enabledExtensions.end(), [&](const auto& name) { pEnabledExtensionNames.push_back(name.c_str()); });
+        for (auto& name : _enabledExtensions) {
+            pEnabledExtensionNames.push_back(name.c_str());
+        }
         
         std::vector<const char *> pEnabledLayers;
 
-        std::for_each(_enabledLayers.begin(), _enabledLayers.end(), [&](const auto & name) { pEnabledLayers.push_back(name.c_str(); });
-        
+        for (auto& layerName : _enabledLayers) {
+            pEnabledLayers.push_back(layerName.c_str());
+        }
 
         VkInstanceCreateInfo instanceCI {};
 
         instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCI.pApplicationInfo = &applicationInfo;
         instanceCI.ppEnabledExtensionNames = pEnabledExtensionNames.data();
+        instanceCI.enabledExtensionCount = pEnabledExtensionNames.size();
         instanceCI.ppEnabledLayerNames = pEnabledLayers.data();
+        instanceCI.enabledLayerCount = pEnabledLayers.size();
 
-        vkCreateInstance(&instanceCI, nullptr, &_handle);
+        Util::vkAssert(vkCreateInstance(&instanceCI, nullptr, &_handle));
+        
+        volkLoadInstance(_handle);
 
-        vkEnumeratePhysicalDevices(_handle, &_physicalDeviceCount, nullptr);
+        Util::vkAssert(vkEnumeratePhysicalDevices(_handle, &_physicalDeviceCount, nullptr));
 
         auto pPhysicalDevices = std::make_unique<VkPhysicalDevice[]> (_physicalDeviceCount);
 
-        vkEnumeratePhysicalDevices(_handle, &_physicalDeviceCount, pPhysicalDevices.get());
+        Util::vkAssert(vkEnumeratePhysicalDevices(_handle, &_physicalDeviceCount, pPhysicalDevices.get()));
 
-        std::for_each(pPhysicalDevices.get(), pPhysicalDevices.get() + _physicalDeviceCount, [&](auto physicalDevice) {
-            _physicalDevices.push_back(PhysicalDevice(physicalDevice));
-        });
+        _physicalDevices = std::make_unique<PhysicalDevice[]> (_physicalDeviceCount);
+
+        for (std::uint32_t i = 0; i < _physicalDeviceCount; i++) {
+            auto pd = PhysicalDevice(pPhysicalDevices[i]);
+            
+            std::swap(_physicalDevices[i], pd);
+        }
+    }
+
+    Instance::~Instance() {
+        vkDestroyInstance(_handle, nullptr);
     }
 
     void Instance::free() {
@@ -70,5 +90,17 @@ namespace mvk {
         static Instance THE_INSTANCE;
 
         return THE_INSTANCE;
+    }
+
+    std::vector<const PhysicalDevice * > Instance::getPhysicalDevices() const {
+        auto out = std::vector<const PhysicalDevice * >();
+
+        out.reserve(_physicalDeviceCount);
+
+        for (std::uint32_t i = 0; i < _physicalDeviceCount; i++) {
+            out.push_back(_physicalDevices.get() + i);
+        }
+
+        return out;
     }
 }
