@@ -70,12 +70,14 @@ namespace mvk {
         }
 
         _fencePool = std::make_unique<FencePool> (this);
+        _semaphorePool = std::make_unique<SemaphorePool> (this);
     }
 
     Device::~Device() {
         waitIdle();
 
         _fencePool.reset();
+        _semaphorePool.reset();
         _shaderCache.clear();
 
         vkDestroyDevice(_handle, nullptr);

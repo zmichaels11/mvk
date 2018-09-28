@@ -12,6 +12,7 @@
 
 #include "mvk/FencePool.hpp"
 #include "mvk/QueueFamily.hpp"
+#include "mvk/SemaphorePool.hpp"
 #include "mvk/ShaderModule.hpp"
 
 namespace mvk {
@@ -25,6 +26,7 @@ namespace mvk {
         std::uint32_t _queueFamilyCount;
         std::vector<std::unique_ptr<ShaderModule>> _shaderCache;
         std::unique_ptr<FencePool> _fencePool;
+        std::unique_ptr<SemaphorePool> _semaphorePool;
 
     public:
         Device() : 
@@ -63,6 +65,14 @@ namespace mvk {
 
         inline VkDevice getHandle() const {
             return _handle;
+        }
+
+        inline Fence * acquireFence() {
+            return _fencePool->acquireFence();
+        }
+
+        inline Semaphore * acquireSemaphore() {
+            return _semaphorePool->acquireSemaphore();
         }
 
         std::vector<QueueFamily *> getQueueFamilies() const;
