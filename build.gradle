@@ -6,17 +6,42 @@ wrapper {
 
 model {
     components {
-        vkcompute_test (NativeExecutableSpec) {
+        marsvk (NativeLibrarySpec) {
             sources {
                 cpp {
                     source {
-                        srcDir "src/main/cpp"
+                        srcDir "src/libmarsvk/cpp"
                         include "**/*.cpp", "**/*.c"
                     }
 
                     exportedHeaders {
-                        srcDir "src/main/include"
-                        include "**/*.hpp"
+                        srcDir "src/libmarsvk/include"
+                        include "**/*.hpp", "**/*.h"
+                    }
+                }
+            }
+
+            binaries.all {
+                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                    cppCompiler.args << "-std=c++14"
+                } else if (toolChain instanceof VisualCpp) {
+                    cppCompiler.args << "/std:c++14"
+                }
+
+                if (targetPlatform.operatingSystem.linux) {
+                    linker.args << "-ldl"
+                }
+            }
+        }
+
+        testInit (NativeExecutableSpec) {
+            sources {
+                cpp {
+                    lib library: "marsvk", linkage: "static"
+
+                    source {
+                        srcDir "src/testInit/cpp"
+                        include "**/*.cpp"
                     }
                 }
             }
