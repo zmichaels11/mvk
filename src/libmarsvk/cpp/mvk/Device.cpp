@@ -14,7 +14,7 @@ namespace mvk {
         Util::vkAssert(vkDeviceWaitIdle(_handle));
     }
 
-    Device::Device(const PhysicalDevice * physicalDevice, const std::set<std::string>& enabledExtensions) {
+    Device::Device(PhysicalDevice * physicalDevice, const std::set<std::string>& enabledExtensions) {
         _physicalDevice = physicalDevice;
         _enabledExtensions = enabledExtensions;
 
@@ -68,11 +68,14 @@ namespace mvk {
 
             std::swap(qf, _queueFamilies[i]);
         }
+
+        _fencePool = std::make_unique<FencePool> (this);
     }
 
     Device::~Device() {
         waitIdle();
 
+        _fencePool.reset();
         _shaderCache.clear();
 
         vkDestroyDevice(_handle, nullptr);
@@ -93,8 +96,8 @@ namespace mvk {
         return out;
     }
 
-    std::vector<const QueueFamily * > Device::getQueueFamilies() const {
-        auto out = std::vector<const QueueFamily *>();
+    std::vector<QueueFamily * > Device::getQueueFamilies() const {
+        auto out = std::vector<QueueFamily *>();
 
         out.reserve(_queueFamilyCount);
 

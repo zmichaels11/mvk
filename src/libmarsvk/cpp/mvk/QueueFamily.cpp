@@ -5,7 +5,7 @@
 #include "mvk/Util.hpp"
 
 namespace mvk {
-    QueueFamily::QueueFamily(const Device * device, std::uint32_t queueFamilyIndex, const VkQueueFamilyProperties& properties) {
+    QueueFamily::QueueFamily(Device * device, std::uint32_t queueFamilyIndex, const VkQueueFamilyProperties& properties) {
         _device = device;
         _index = queueFamilyIndex;
         _properties = properties;

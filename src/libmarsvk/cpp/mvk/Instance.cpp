@@ -92,8 +92,8 @@ namespace mvk {
         return THE_INSTANCE;
     }
 
-    std::vector<const PhysicalDevice * > Instance::getPhysicalDevices() const {
-        auto out = std::vector<const PhysicalDevice * >();
+    std::vector<PhysicalDevice * > Instance::getPhysicalDevices() const {
+        auto out = std::vector<PhysicalDevice * >();
 
         out.reserve(_physicalDeviceCount);
 

@@ -17,13 +17,13 @@ namespace mvk {
     private:
         VkShaderModule _handle;
         CreateInfo _info;
-        const Device * _device;
+        Device * _device;
     
     public:
         ShaderModule() :
             _handle(VK_NULL_HANDLE) {}
 
-        ShaderModule(const Device * device, const CreateInfo& info);
+        ShaderModule(Device * device, const CreateInfo& info);
 
         ShaderModule(const ShaderModule&) = delete;
 
@@ -41,6 +41,10 @@ namespace mvk {
 
         inline const CreateInfo& getInfo() const {
             return _info;
+        }
+
+        inline Device * getDevice() const {
+            return _device;
         }
     };
 

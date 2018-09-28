@@ -13,11 +13,11 @@ namespace mvk {
 
     class QueueFamily {
         std::uint32_t _index;
-        const Device * _device;
+        Device * _device;
         VkQueueFamilyProperties _properties;
     
     public:
-        QueueFamily(const Device * device, std::uint32_t queueFamilyIndex, const VkQueueFamilyProperties& properties);
+        QueueFamily(Device * device, std::uint32_t queueFamilyIndex, const VkQueueFamilyProperties& properties);
 
         QueueFamily() :
             _index(~0),
@@ -35,6 +35,16 @@ namespace mvk {
 
         bool canPresent(VkSurfaceKHR surface) const;
 
-        const Device * getDevice() const;
+        inline Device * getDevice() const {
+            return _device;
+        }
+
+        inline std::uint32_t getIndex() const {
+            return _index;
+        }
+
+        inline const VkQueueFamilyProperties& getProperties() const {
+            return _properties;
+        }
     };
 }

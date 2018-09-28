@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "mvk/FencePool.hpp"
 #include "mvk/QueueFamily.hpp"
 #include "mvk/ShaderModule.hpp"
 
@@ -17,19 +18,20 @@ namespace mvk {
     class PhysicalDevice;
 
     class Device {
-        const PhysicalDevice * _physicalDevice;
+        PhysicalDevice * _physicalDevice;
         VkDevice _handle;
         std::set<std::string> _enabledExtensions;
         std::unique_ptr<QueueFamily[]> _queueFamilies;
         std::uint32_t _queueFamilyCount;
         std::vector<std::unique_ptr<ShaderModule>> _shaderCache;
+        std::unique_ptr<FencePool> _fencePool;
 
     public:
         Device() : 
             _handle(VK_NULL_HANDLE),
             _physicalDevice(nullptr) {}
 
-        Device(const PhysicalDevice * physicalDevice, const std::set<std::string>& enabledExtensions);
+        Device(PhysicalDevice * physicalDevice, const std::set<std::string>& enabledExtensions);
 
         ~Device();
 
@@ -47,11 +49,11 @@ namespace mvk {
             return _enabledExtensions;
         }
 
-        inline const PhysicalDevice * getPhysicalDevice() const noexcept {
+        inline PhysicalDevice * getPhysicalDevice() const noexcept {
             return _physicalDevice;
         }
 
-        inline const QueueFamily * getQueueFamily(std::ptrdiff_t index) const noexcept {
+        inline QueueFamily * getQueueFamily(std::ptrdiff_t index) const noexcept {
             return _queueFamilies.get() + index;
         }
 
@@ -63,7 +65,7 @@ namespace mvk {
             return _handle;
         }
 
-        std::vector<const QueueFamily *> getQueueFamilies() const;
+        std::vector<QueueFamily *> getQueueFamilies() const;
 
         ShaderModule * getShaderModule(const ShaderModule::CreateInfo& createInfo);
     };

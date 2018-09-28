@@ -27,7 +27,7 @@ namespace mvk {
         }
     }
 
-    ShaderModule::ShaderModule(const Device * device, const ShaderModule::CreateInfo& info) {
+    ShaderModule::ShaderModule(Device * device, const ShaderModule::CreateInfo& info) {
         _device = device;
         _info = info;
 

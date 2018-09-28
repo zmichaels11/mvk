@@ -40,7 +40,7 @@ namespace mvk {
 
             void free();
 
-            inline const VkInstance getHandle() const {
+            inline VkInstance getHandle() const {
                 return _handle;
             }
 
@@ -48,10 +48,10 @@ namespace mvk {
                 return _physicalDeviceCount;
             }
 
-            inline const PhysicalDevice * getPhysicalDevice(std::ptrdiff_t index) const {
+            inline PhysicalDevice * getPhysicalDevice(std::ptrdiff_t index) const {
                 return _physicalDevices.get() + index;
             }
 
-            std::vector<const PhysicalDevice *> getPhysicalDevices() const;
+            std::vector<PhysicalDevice *> getPhysicalDevices() const;
     };
 }
