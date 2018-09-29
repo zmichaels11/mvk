@@ -4,13 +4,17 @@
 #include <cstdint>
 
 #include "volk.h"
+#include "vk_mem_alloc.h"
 
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
+#include "mvk/Buffer.hpp"
+#include "mvk/Device.hpp"
 #include "mvk/FencePool.hpp"
+#include "mvk/MemoryUsage.hpp"
 #include "mvk/QueueFamily.hpp"
 #include "mvk/SemaphorePool.hpp"
 #include "mvk/ShaderModule.hpp"
@@ -27,6 +31,7 @@ namespace mvk {
         std::vector<std::unique_ptr<ShaderModule>> _shaderCache;
         std::unique_ptr<FencePool> _fencePool;
         std::unique_ptr<SemaphorePool> _semaphorePool;
+        VmaAllocator _allocator;
 
     public:
         Device() : 
@@ -73,6 +78,14 @@ namespace mvk {
 
         inline Semaphore * acquireSemaphore() {
             return _semaphorePool->acquireSemaphore();
+        }
+
+        inline VmaAllocator& getMemoryAllocator() {
+            return _allocator;
+        }
+
+        inline std::unique_ptr<Buffer> createBuffer(const Buffer::CreateInfo& info, MemoryUsage memoryUsage) {
+            return std::make_unique<Buffer> (this, info, memoryUsage);
         }
 
         std::vector<QueueFamily *> getQueueFamilies() const;

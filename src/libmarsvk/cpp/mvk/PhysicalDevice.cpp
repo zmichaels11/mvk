@@ -7,8 +7,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include "mvk/MemoryProperties.hpp"
-
 namespace mvk {
     PhysicalDevice::PhysicalDevice(VkPhysicalDevice handle) {
         _handle = handle;
@@ -40,19 +38,6 @@ namespace mvk {
         vkGetPhysicalDeviceMemoryProperties(handle, &_memoryProperties);
 
         _vendor = static_cast<Vendor> (_properties.vendorID);
-
-        auto memoryTypes = _memoryProperties.memoryTypeCount;
-        auto umFlags = static_cast<VkMemoryPropertyFlags> (MemoryProperties::UNIFIED);
-
-        bool hasUM = false;
-        for (std::uint32_t i = 0; i < memoryTypes; i++) {
-            if (_memoryProperties.memoryTypes[i].propertyFlags & umFlags) {
-                hasUM = true;
-                break;
-            }
-        }
-
-        _hasUniformMemory = hasUM;
     }
 
     PhysicalDeviceType PhysicalDevice::getPhysicalDeviceType() const {

@@ -69,6 +69,13 @@ namespace mvk {
             std::swap(qf, _queueFamilies[i]);
         }
 
+        VmaAllocatorCreateInfo vmaAllocatorCI {};
+
+        vmaAllocatorCI.physicalDevice = physicalDevice->getHandle();
+        vmaAllocatorCI.device = _handle;
+
+        vmaCreateAllocator(&vmaAllocatorCI, &_allocator);
+
         _fencePool = std::make_unique<FencePool> (this);
         _semaphorePool = std::make_unique<SemaphorePool> (this);
     }
@@ -79,6 +86,8 @@ namespace mvk {
         _fencePool.reset();
         _semaphorePool.reset();
         _shaderCache.clear();
+
+        vmaDestroyAllocator(_allocator);
 
         vkDestroyDevice(_handle, nullptr);
     }
