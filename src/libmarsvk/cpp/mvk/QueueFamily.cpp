@@ -1,5 +1,6 @@
 #include "mvk/QueueFamily.hpp"
 
+#include <algorithm>
 #include <map>
 #include <memory>
 
@@ -9,6 +10,9 @@
 
 namespace mvk {
     namespace {
+        constexpr int ALL_QUEUES = -1;
+        constexpr int MAX_QUEUES = 1;
+
         thread_local std::map<int, std::unique_ptr<CommandPool>> _commandPools;
     }
 
@@ -16,6 +20,18 @@ namespace mvk {
         _device = device;
         _index = queueFamilyIndex;
         _properties = properties;
+
+        int nQueues = static_cast<int> (properties.queueCount);
+        
+        if (MAX_QUEUES != ALL_QUEUES) {
+            nQueues = std::min(nQueues, MAX_QUEUES);
+        }
+
+        _queues.reserve(static_cast<std::size_t> (nQueues));
+
+        for (int i = 0; i < nQueues; i++) {
+            _queues.push_back(std::make_unique<Queue> (this, i));
+        }
     }
 
     QueueFlag QueueFamily::getFlags() const {
@@ -38,5 +54,9 @@ namespace mvk {
         }
 
         return pPool.get();
+    }
+
+    void QueueFamily::detach() {
+        _commandPools[_index] = nullptr;
     }
 }

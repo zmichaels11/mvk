@@ -4,6 +4,8 @@
 
 #include "volk.h"
 
+#include <memory>
+
 #include "mvk/DescriptorType.hpp"
 
 namespace mvk {
@@ -52,7 +54,14 @@ namespace mvk {
         void release();
 
         void writeBuffer(
-            DescriptorType type, std::uint32_t binding, 
+            DescriptorType type, int binding, 
             const Buffer * buffer, VkDeviceSize offset = 0L, VkDeviceSize range = VK_WHOLE_SIZE);
+
+        inline void writeBuffer(
+            DescriptorType type, int binding,
+            const std::unique_ptr<Buffer>& buffer, VkDeviceSize offset = 0L, VkDeviceSize range = VK_WHOLE_SIZE) {
+
+            writeBuffer(type, binding, buffer.get(), offset, range);
+        }
     };
 }

@@ -30,7 +30,7 @@ namespace mvk {
         }
     }
 
-    void Fence::resetFence() {
+    void Fence::reset() {
         Util::vkAssert(vkResetFences(getDevice()->getHandle(), 1, &_handle));
     }
 

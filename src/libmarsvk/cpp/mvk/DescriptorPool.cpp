@@ -1,5 +1,6 @@
 #include "mvk/DescriptorPool.hpp"
 
+#include <iostream>
 #include <stdexcept>
 
 #include "mvk/DescriptorSetLayout.hpp"
@@ -95,6 +96,8 @@ namespace mvk {
         auto out = ptr.get();
 
         _pools.push_back(std::move(ptr));
+
+        return out;
     }
 
     Device * DescriptorPool::getDevice() const {

@@ -4,9 +4,12 @@
 
 #include "volk.h"
 
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "mvk/CommandPool.hpp"
+#include "mvk/Queue.hpp"
 #include "mvk/QueueFlag.hpp"
 
 namespace mvk {
@@ -16,6 +19,7 @@ namespace mvk {
         int _index;
         Device * _device;
         VkQueueFamilyProperties _properties;
+        std::vector<std::unique_ptr<Queue>> _queues;
     
     public:
         QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties);
@@ -49,5 +53,11 @@ namespace mvk {
         inline const VkQueueFamilyProperties& getProperties() const {
             return _properties;
         }
+
+        inline Queue * getQueue(int queueIndex) const noexcept {
+            return _queues[queueIndex].get();
+        }
+
+        void detach();
     };
 }

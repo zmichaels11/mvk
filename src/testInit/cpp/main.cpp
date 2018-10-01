@@ -5,7 +5,7 @@
 #include <string>
 
 int main(int argc, char ** argv) {
-    //mvk::Instance::enableLayer("VK_LAYER_LUNARG_standard_validation");
+    mvk::Instance::enableLayer("VK_LAYER_LUNARG_standard_validation");
     //mvk::Instance::enableLayer("VK_LAYER_LUNARG_api_dump");
     
     auto& instance = mvk::Instance::getCurrent();

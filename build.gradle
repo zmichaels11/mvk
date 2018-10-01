@@ -58,5 +58,30 @@ model {
                 }
             }
         }
+
+        testCompute (NativeExecutableSpec) {
+            sources {
+                cpp {
+                    lib library: "marsvk", linkage: "static"
+
+                    source {
+                        srcDir "src/testCompute/cpp"
+                        include "**/*.cpp"
+                    }
+                }
+            }
+
+            binaries.all {
+                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                    cppCompiler.args << "-std=c++14"
+                } else if (toolChain instanceof VisualCpp) {
+                    cppCompiler.args << "/std:c++14"
+                }
+
+                if (targetPlatform.operatingSystem.linux) {
+                    linker.args << "-ldl"
+                }
+            }
+        }
     }
 }

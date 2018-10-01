@@ -27,6 +27,11 @@ namespace mvk {
         Util::vkAssert(vkCreateComputePipelines(pDevice->getHandle(), cache->getHandle(), 1, &computePipelineCI, nullptr, &_handle));
     }
 
+    ComputePipeline::~ComputePipeline() {
+        _layout->release();
+        vkDestroyPipeline(getDevice()->getHandle(), _handle, nullptr);
+    }
+
     PipelineBindpoint ComputePipeline::getBindpoint() const {
         return PipelineBindpoint::COMPUTE;
     }
