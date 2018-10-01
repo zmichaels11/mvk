@@ -12,10 +12,12 @@
 #include <vector>
 
 #include "mvk/Buffer.hpp"
+#include "mvk/ComputePipeline.hpp"
 #include "mvk/DescriptorSetLayoutCache.hpp"
 #include "mvk/Device.hpp"
 #include "mvk/FencePool.hpp"
 #include "mvk/MemoryUsage.hpp"
+#include "mvk/PipelineCache.hpp"
 #include "mvk/PipelineLayoutCache.hpp"
 #include "mvk/QueueFamily.hpp"
 #include "mvk/SemaphorePool.hpp"
@@ -35,6 +37,7 @@ namespace mvk {
         std::unique_ptr<SemaphorePool> _semaphorePool;
         std::unique_ptr<DescriptorSetLayoutCache> _descriptorSetLayoutCache;
         std::unique_ptr<PipelineLayoutCache> _pipelineLayoutCache;
+        std::unique_ptr<PipelineCache> _pipelineCache;
         VmaAllocator _allocator;
 
     public:
@@ -98,6 +101,10 @@ namespace mvk {
 
         inline PipelineLayout * allocatePipelineLayout(const PipelineLayout::CreateInfo& createInfo) {
             return _pipelineLayoutCache->allocatePipelineLayout(createInfo);
+        }
+
+        inline std::unique_ptr<ComputePipeline> createPipeline(const ComputePipeline::CreateInfo& createInfo) {
+            return _pipelineCache->createPipeline(createInfo);
         }
 
         std::vector<QueueFamily *> getQueueFamilies() const;

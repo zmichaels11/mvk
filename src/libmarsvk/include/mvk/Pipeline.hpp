@@ -20,11 +20,11 @@ namespace mvk {
 
         virtual Device * getDevice() const = 0;
 
-        virtual PipelineCache getPipelineCache() const = 0;
+        virtual PipelineCache * getPipelineCache() const = 0;
 
-        virtual PipelineLayout getPipelineLayout() const = 0;
+        virtual PipelineLayout * getPipelineLayout() const = 0;
 
-        virtual DescriptorSetLayout * getDescriptorSetLayout(int index) const = 0;
+        virtual DescriptorSetLayout * getDescriptorSetLayout(std::ptrdiff_t index) const = 0;
 
         virtual std::vector<DescriptorSetLayout * > getDescriptorSetLayouts() const = 0;
 
