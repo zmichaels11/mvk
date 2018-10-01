@@ -6,21 +6,22 @@
 
 #include <string>
 
+#include "mvk/CommandPool.hpp"
 #include "mvk/QueueFlag.hpp"
 
 namespace mvk {
     class Device;
 
     class QueueFamily {
-        std::uint32_t _index;
+        int _index;
         Device * _device;
         VkQueueFamilyProperties _properties;
     
     public:
-        QueueFamily(Device * device, std::uint32_t queueFamilyIndex, const VkQueueFamilyProperties& properties);
+        QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties);
 
         QueueFamily() :
-            _index(~0),
+            _index(-1),
             _device(nullptr) {}
 
         QueueFamily(const QueueFamily&) = delete;
@@ -33,13 +34,15 @@ namespace mvk {
 
         QueueFlag getFlags() const;
 
+        CommandPool * getCurrentCommandPool() const;
+
         bool canPresent(VkSurfaceKHR surface) const;
 
         inline Device * getDevice() const {
             return _device;
         }
 
-        inline std::uint32_t getIndex() const {
+        inline int getIndex() const {
             return _index;
         }
 
