@@ -69,22 +69,47 @@ namespace mvk {
             std::swap(qf, _queueFamilies[i]);
         }
 
-        VmaAllocatorCreateInfo vmaAllocatorCI {};
+        auto vmaVulkanFunctions = VmaVulkanFunctions {};
+        vmaVulkanFunctions.vkAllocateMemory = vkAllocateMemory;
+        vmaVulkanFunctions.vkBindBufferMemory = vkBindBufferMemory;
+        vmaVulkanFunctions.vkBindImageMemory = vkBindImageMemory;
+        vmaVulkanFunctions.vkCreateBuffer = vkCreateBuffer;
+        vmaVulkanFunctions.vkCreateImage = vkCreateImage;
+        vmaVulkanFunctions.vkDestroyBuffer = vkDestroyBuffer;
+        vmaVulkanFunctions.vkDestroyImage = vkDestroyImage;
+        vmaVulkanFunctions.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges;
+        vmaVulkanFunctions.vkFreeMemory = vkFreeMemory;
+        vmaVulkanFunctions.vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements;
+        vmaVulkanFunctions.vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2;
+        vmaVulkanFunctions.vkGetImageMemoryRequirements = vkGetImageMemoryRequirements;
+        vmaVulkanFunctions.vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2;
+        vmaVulkanFunctions.vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties;
+        vmaVulkanFunctions.vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties;
+        vmaVulkanFunctions.vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges;
+        vmaVulkanFunctions.vkMapMemory = vkMapMemory;
+        vmaVulkanFunctions.vkUnmapMemory = vkUnmapMemory;
 
+        auto vmaAllocatorCI = VmaAllocatorCreateInfo {};
+
+        vmaAllocatorCI.pVulkanFunctions = &vmaVulkanFunctions;
         vmaAllocatorCI.physicalDevice = physicalDevice->getHandle();
         vmaAllocatorCI.device = _handle;
+    
+        _allocator = VK_NULL_HANDLE;        
 
         vmaCreateAllocator(&vmaAllocatorCI, &_allocator);
 
         _fencePool = std::make_unique<FencePool> (this);
         _semaphorePool = std::make_unique<SemaphorePool> (this);
+        _descriptorSetLayoutCache = std::make_unique<DescriptorSetLayoutCache> (this);
     }
 
     Device::~Device() {
         waitIdle();
 
-        _fencePool.reset();
+        _descriptorSetLayoutCache.reset();
         _semaphorePool.reset();
+        _fencePool.reset();
         _shaderCache.clear();
 
         vmaDestroyAllocator(_allocator);

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "mvk/DescriptorPool.hpp"
+#include "mvk/DescriptorSet.hpp"
 #include "mvk/DescriptorType.hpp"
 #include "mvk/ShaderStage.hpp"
 
@@ -23,7 +24,7 @@ namespace mvk {
         };
 
         struct CreateInfo {
-            int flags;
+            unsigned int flags;
             std::vector<Binding> bindings;
         };
 
@@ -53,8 +54,36 @@ namespace mvk {
 
         Device * getDevice() const;
 
+        inline VkDescriptorSetLayout getHandle() const noexcept {
+            return _handle;
+        }
+
+        inline const CreateInfo getInfo() const noexcept {
+            return _info;
+        }
+
         inline DescriptorSetLayoutCache * getDescriptorSetLayoutCache() const noexcept {
             return _cache;
         }
+
+        inline DescriptorPool * getDescriptorPool() const noexcept {
+            return _pool.get();
+        }
+
+        inline DescriptorSet * allocate() {
+            return _pool->allocate();
+        }
     };
+
+    inline bool operator== (const DescriptorSetLayout::Binding& lhs, const DescriptorSetLayout::Binding& rhs) {
+        return lhs.binding == rhs.binding 
+            && lhs.descriptorType == rhs.descriptorType 
+            && lhs.descriptorCount == rhs.descriptorCount 
+            && lhs.stages == rhs.stages;
+    }
+
+    inline bool operator== (const DescriptorSetLayout::CreateInfo& lhs, const DescriptorSetLayout::CreateInfo& rhs) {
+        return lhs.flags == rhs.flags 
+                && lhs.bindings == rhs.bindings;
+    }
 }

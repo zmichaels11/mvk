@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "volk.h"
 
 #include "mvk/DescriptorType.hpp"
@@ -37,10 +39,20 @@ namespace mvk {
             return _pool;
         }
 
+        inline int getPoolIndex() const {
+            return _poolIndex;
+        }
+
+        inline VkDescriptorSet getHandle() const {
+            return _handle;
+        }
+
         Device * getDevice() const;
 
         void release();
 
-        void writeBuffer(DescriptorType type, int binding, Buffer * buffer);
+        void writeBuffer(
+            DescriptorType type, std::uint32_t binding, 
+            const Buffer * buffer, VkDeviceSize offset = 0L, VkDeviceSize range = VK_WHOLE_SIZE);
     };
 }

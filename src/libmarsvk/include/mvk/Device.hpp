@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "mvk/Buffer.hpp"
+#include "mvk/DescriptorSetLayoutCache.hpp"
 #include "mvk/Device.hpp"
 #include "mvk/FencePool.hpp"
 #include "mvk/MemoryUsage.hpp"
@@ -31,6 +32,7 @@ namespace mvk {
         std::vector<std::unique_ptr<ShaderModule>> _shaderCache;
         std::unique_ptr<FencePool> _fencePool;
         std::unique_ptr<SemaphorePool> _semaphorePool;
+        std::unique_ptr<DescriptorSetLayoutCache> _descriptorSetLayoutCache;
         VmaAllocator _allocator;
 
     public:

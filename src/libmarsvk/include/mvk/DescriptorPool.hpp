@@ -2,8 +2,9 @@
 
 #include "volk.h"
 
-#include <vector>
+#include <memory>
 #include <set>
+#include <vector>
 
 #include "mvk/DescriptorSet.hpp"
 
@@ -13,15 +14,10 @@ namespace mvk {
 
     class DescriptorPool {
     public:
-        struct Size {
-            unsigned int type;
-            unsigned int descriptorCount;
-        };
-
         struct CreateInfo {
             unsigned int flags;
             unsigned int maxSets;
-            std::vector<Size> poolSizes;
+            std::vector<VkDescriptorPoolSize> poolSizes;
         };
 
     private:
@@ -30,18 +26,18 @@ namespace mvk {
             int _index;
             int _allocatedSets;
 
-            Pool(VkDescriptorPool handle, int index, int allocatedSets) :
+            Pool(VkDescriptorPool handle, int index) :
                 _handle(handle),
                 _index(index),
-                _allocatedSets(allocatedSets) {}
+                _allocatedSets(0) {}
         };
 
         CreateInfo _info;
         DescriptorSetLayout * _descriptorSetLayout;
-        std::vector<Pool> _pools;
-        std::set<DescriptorSet * > _allocatedDescriptorSets;
+        std::vector<std::unique_ptr<Pool>> _pools;
+        std::set<std::unique_ptr<DescriptorSet>> _allocatedDescriptorSets;
     
-        Pool allocatePool(Device * device);
+        Pool * allocatePool(Device * device);
 
     public:
         DescriptorPool():
