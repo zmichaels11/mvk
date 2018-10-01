@@ -8,4 +8,10 @@ namespace mvk {
         int offset;
         unsigned int size;
     };
+
+    inline bool operator== (const PushConstantRange& lhs, const PushConstantRange& rhs) {
+        return lhs.stages == rhs.stages
+                && lhs.offset == rhs.offset
+                && lhs.size == rhs.size;
+    }
 }

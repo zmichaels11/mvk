@@ -16,6 +16,7 @@
 #include "mvk/Device.hpp"
 #include "mvk/FencePool.hpp"
 #include "mvk/MemoryUsage.hpp"
+#include "mvk/PipelineLayoutCache.hpp"
 #include "mvk/QueueFamily.hpp"
 #include "mvk/SemaphorePool.hpp"
 #include "mvk/ShaderModule.hpp"
@@ -33,6 +34,7 @@ namespace mvk {
         std::unique_ptr<FencePool> _fencePool;
         std::unique_ptr<SemaphorePool> _semaphorePool;
         std::unique_ptr<DescriptorSetLayoutCache> _descriptorSetLayoutCache;
+        std::unique_ptr<PipelineLayoutCache> _pipelineLayoutCache;
         VmaAllocator _allocator;
 
     public:
@@ -88,6 +90,14 @@ namespace mvk {
 
         inline std::unique_ptr<Buffer> createBuffer(const Buffer::CreateInfo& info, MemoryUsage memoryUsage) {
             return std::make_unique<Buffer> (this, info, memoryUsage);
+        }
+
+        inline DescriptorSetLayout * allocateDescriptorSetLayout(const DescriptorSetLayout::CreateInfo& createInfo) {
+            return _descriptorSetLayoutCache->allocateDescriptorSetLayout(createInfo);
+        }
+
+        inline PipelineLayout * allocatePipelineLayout(const PipelineLayout::CreateInfo& createInfo) {
+            return _pipelineLayoutCache->allocatePipelineLayout(createInfo);
         }
 
         std::vector<QueueFamily *> getQueueFamilies() const;

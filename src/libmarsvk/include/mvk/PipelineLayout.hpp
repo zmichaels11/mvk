@@ -42,8 +42,22 @@ namespace mvk {
             return _cache;
         }
 
+        inline const CreateInfo& getInfo() const noexcept {
+            return _info;
+        }
+
+        inline VkPipelineLayout getHandle() const noexcept {
+            return _handle;
+        }
+
         Device * getDevice() const;
 
         void release();
     };
+
+    inline bool operator== (const PipelineLayout::CreateInfo& lhs, const PipelineLayout::CreateInfo& rhs) {
+        return lhs.flags == rhs.flags
+                && lhs.pushConstantRanges == rhs.pushConstantRanges
+                && lhs.setLayoutInfos == rhs.setLayoutInfos;
+    }
 }
