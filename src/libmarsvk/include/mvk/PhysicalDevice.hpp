@@ -29,7 +29,13 @@ namespace mvk {
 
             PhysicalDeviceType getPhysicalDeviceType() const;
 
-            std::unique_ptr<Device> createDevice(const std::set<std::string>& enabledExtensions);
+            inline std::unique_ptr<Device> createDevice(const std::set<std::string>& enabledExtensions) {
+                return std::make_unique<Device> (this, enabledExtensions);
+            }
+
+            inline std::unique_ptr<Device> createDevice() {
+                return createDevice(std::set<std::string>());
+            }
 
             inline VkPhysicalDevice getHandle() const {
                 return _handle;

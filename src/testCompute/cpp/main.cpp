@@ -11,13 +11,11 @@ constexpr int OUTPUT_BUFFER_BINDING = 1;
 
 int main(int argc, char ** argv) {
     mvk::Instance::enableLayer("VK_LAYER_LUNARG_standard_validation");
-    mvk::Instance::enableLayer("VK_LAYER_LUNARG_api_dump");
+    //mvk::Instance::enableLayer("VK_LAYER_LUNARG_api_dump");
 
     auto& instance = mvk::Instance::getCurrent();
     auto pPhysicalDevice = instance.getPhysicalDevice(0);
-
-    auto deviceExtensions = std::set<std::string>();
-    auto pDevice = pPhysicalDevice->createDevice(deviceExtensions);
+    auto pDevice = pPhysicalDevice->createDevice();
 
     std::cout << "Compute Shader Squaring\n";
     std::cout << "Inputs: [";
@@ -49,7 +47,7 @@ int main(int argc, char ** argv) {
     auto pipelineCI = mvk::ComputePipeline::CreateInfo {};
     pipelineCI.stage.name = "main";
     pipelineCI.stage.stage = mvk::ShaderStage::COMPUTE;
-    pipelineCI.stage.moduleInfo.path = "square.comp.spv";
+    pipelineCI.stage.moduleInfo.path = "shaders/testCompute/square.comp.spv";
 
     {
         auto setLayoutInfo = mvk::DescriptorSetLayout::CreateInfo {};
@@ -74,8 +72,8 @@ int main(int argc, char ** argv) {
     auto pPipeline = pDevice->createPipeline(pipelineCI);
     auto pDescriptorSet = pPipeline->getDescriptorSetLayout(0)->allocate();
 
-    pDescriptorSet->writeBuffer(mvk::DescriptorType::STORAGE_BUFFER, INPUT_BUFFER_BINDING, pInputBuffer.get());
-    pDescriptorSet->writeBuffer(mvk::DescriptorType::STORAGE_BUFFER, OUTPUT_BUFFER_BINDING, pOutputBuffer.get());
+    pDescriptorSet->writeBuffer(mvk::DescriptorType::STORAGE_BUFFER, INPUT_BUFFER_BINDING, pInputBuffer);
+    pDescriptorSet->writeBuffer(mvk::DescriptorType::STORAGE_BUFFER, OUTPUT_BUFFER_BINDING, pOutputBuffer);
 
     auto pQueueFamily = pDevice->getQueueFamily(0);
     auto pQueue = pQueueFamily->getQueue(0);
@@ -85,8 +83,8 @@ int main(int argc, char ** argv) {
         auto pCommandBuffer = pQueueFamily->getCurrentCommandPool()->allocate();
 
         pCommandBuffer->begin(mvk::CommandBufferUsageFlag::ONE_TIME_SUBMIT);
-        pCommandBuffer->bindPipeline(pPipeline.get());
-        pCommandBuffer->bindDescriptorSet(pPipeline.get(), 0, pDescriptorSet);
+        pCommandBuffer->bindPipeline(pPipeline);
+        pCommandBuffer->bindDescriptorSet(pPipeline, 0, pDescriptorSet);
 
         auto gX = std::max(1u, static_cast<unsigned int> (inputData.size()) / WORKGROUP_SIZE);
 

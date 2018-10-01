@@ -1,0 +1,16 @@
+#version 450
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+layout(binding = 1, std430) writeonly buffer Outputs {
+    vec4 uOutputs[];
+};
+
+layout(binding = 0, std430) readonly buffer Inputs {
+    vec4 uInputs[];
+};
+
+void main() {
+    uint id = gl_GlobalInvocationID.x;
+    
+    uOutputs[id] = uInputs[id] * uInputs[id];
+}

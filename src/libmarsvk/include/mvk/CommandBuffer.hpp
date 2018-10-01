@@ -2,6 +2,8 @@
 
 #include "volk.h"
 
+#include <memory>
+
 #include "mvk/CommandBufferUsageFlag.hpp"
 #include "mvk/CommandBufferLevel.hpp"
 #include "mvk/ShaderStage.hpp"
@@ -45,7 +47,17 @@ namespace mvk {
 
         void bindDescriptorSet(const Pipeline * pipeline, int firstSet, const DescriptorSet * descriptorSet);
 
+        template<class PipelineT>
+        inline void bindDescriptorSet(const std::unique_ptr<PipelineT>& pipeline, int firstSet, const DescriptorSet * descriptorSet) {
+            bindDescriptorSet(pipeline.get(), firstSet, descriptorSet);
+        }
+
         void bindPipeline(const Pipeline * pipeline);
+
+        template<class PipelineT>
+        inline void bindPipeline(std::unique_ptr<PipelineT>& pipeline) {
+            bindPipeline(pipeline.get());
+        }
 
         void dispatch(unsigned int groupsX, unsigned int groupsY = 1, unsigned int groupsZ = 1);
 

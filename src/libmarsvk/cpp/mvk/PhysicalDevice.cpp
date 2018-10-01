@@ -44,10 +44,6 @@ namespace mvk {
         return static_cast<PhysicalDeviceType> (_properties.deviceType);
     }
 
-    std::unique_ptr<Device> PhysicalDevice::createDevice(const std::set<std::string>& enabledExtensions) {
-        return std::make_unique<Device> (this, enabledExtensions);
-    }
-
     std::string PhysicalDevice::toString() const {
         auto out = std::stringstream();
         auto version = _properties.apiVersion;
