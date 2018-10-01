@@ -103,12 +103,14 @@ namespace mvk {
         _semaphorePool = std::make_unique<SemaphorePool> (this);
         _descriptorSetLayoutCache = std::make_unique<DescriptorSetLayoutCache> (this);
         _pipelineLayoutCache = std::make_unique<PipelineLayoutCache> (this);
+        _pipelineCache = std::make_unique<PipelineCache> (this);
     }
 
     Device::~Device() {
         waitIdle();
 
         _descriptorSetLayoutCache.reset();
+        _pipelineCache.reset();
         _pipelineLayoutCache.reset();
         _semaphorePool.reset();
         _fencePool.reset();
