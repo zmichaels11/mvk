@@ -52,7 +52,7 @@ namespace mvk {
         void release();
 
         void writeBuffer(
-            DescriptorType type, std::uint32_t binding, 
+            DescriptorType type, int binding, 
             const Buffer * buffer, VkDeviceSize offset = 0L, VkDeviceSize range = VK_WHOLE_SIZE);
     };
 }

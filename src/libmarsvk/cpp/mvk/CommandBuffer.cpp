@@ -11,6 +11,10 @@ namespace mvk {
         vkFreeCommandBuffers(getDevice()->getHandle(), _pool->getHandle(), 1, &_handle);
     }
 
+    Device * CommandBuffer::getDevice() const {
+        return _pool->getDevice();
+    }
+
     void CommandBuffer::begin(CommandBufferUsageFlag flags) {
         auto commandBufferBI = VkCommandBufferBeginInfo {};
         commandBufferBI.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

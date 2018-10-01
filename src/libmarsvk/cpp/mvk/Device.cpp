@@ -109,9 +109,9 @@ namespace mvk {
     Device::~Device() {
         waitIdle();
 
-        _descriptorSetLayoutCache.reset();
-        _pipelineCache.reset();
         _pipelineLayoutCache.reset();
+        _pipelineCache.reset();
+        _descriptorSetLayoutCache.reset();
         _semaphorePool.reset();
         _fencePool.reset();
         _shaderCache.clear();

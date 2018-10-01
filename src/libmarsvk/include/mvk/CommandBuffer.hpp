@@ -33,6 +33,14 @@ namespace mvk {
             return _pool;
         }
 
+        inline VkCommandBuffer getHandle() const noexcept {
+            return _handle;
+        }
+
+        inline CommandBufferLevel getLevel() const noexcept {
+            return _level;
+        }
+
         void begin(CommandBufferUsageFlag flags);
 
         void bindDescriptorSet(const Pipeline * pipeline, int firstSet, const DescriptorSet * descriptorSet);

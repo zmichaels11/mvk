@@ -20,7 +20,6 @@ namespace mvk {
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI {};
         descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         descriptorSetLayoutCI.flags = _info.flags;
-        descriptorSetLayoutCI.bindingCount = _info.bindings.size();
 
         auto pBindings = std::vector<VkDescriptorSetLayoutBinding>();
         pBindings.reserve(_info.bindings.size());
@@ -34,6 +33,9 @@ namespace mvk {
 
             pBindings.push_back(descriptorSetLayoutBinding);
         }
+
+        descriptorSetLayoutCI.pBindings = pBindings.data();
+        descriptorSetLayoutCI.bindingCount = pBindings.size();
 
         _handle = VK_NULL_HANDLE;
 

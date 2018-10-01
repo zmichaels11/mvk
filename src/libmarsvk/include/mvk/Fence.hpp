@@ -41,7 +41,7 @@ namespace mvk {
 
         bool isSignaled() const;
 
-        void resetFence();
+        void reset();
 
         void waitFor();
 
