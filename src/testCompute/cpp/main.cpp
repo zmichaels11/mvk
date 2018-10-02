@@ -10,8 +10,8 @@ constexpr int INPUT_BUFFER_BINDING = 0;
 constexpr int OUTPUT_BUFFER_BINDING = 1;
 
 int main(int argc, char ** argv) {
-    mvk::Instance::enableLayer("VK_LAYER_LUNARG_standard_validation");
-    //mvk::Instance::enableLayer("VK_LAYER_LUNARG_api_dump");
+    mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
+    //mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
 
     auto& instance = mvk::Instance::getCurrent();
     auto pPhysicalDevice = instance.getPhysicalDevice(0);

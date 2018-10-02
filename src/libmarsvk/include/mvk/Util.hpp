@@ -6,6 +6,7 @@
 
 #include "mvk/AspectFlag.hpp"
 #include "mvk/Format.hpp"
+#include "mvk/InstanceLayer.hpp"
 
 namespace mvk {
     namespace Util {
@@ -18,6 +19,8 @@ namespace mvk {
         }
 
         std::string translateVulkanResult(VkResult result);
+
+        std::string name(const InstanceLayer& layer);
 
         void vkAssert(VkResult result);
 
