@@ -72,7 +72,7 @@ namespace mvk {
 
             auto description = VkSubpassDescription {};
             description.flags = subpass.flags;
-            description.pipelineBindPoint = static_cast<VkPipelineBindPoint> (subpass.pipelineBindpoint);
+            description.pipelineBindPoint = static_cast<VkPipelineBindPoint> (subpass.pipelineBindPoint);
             description.inputAttachmentCount = descriptionInfo.inputAttachments.size();
             description.pInputAttachments = descriptionInfo.inputAttachments.data();
             description.colorAttachmentCount = descriptionInfo.colorAttachments.size();

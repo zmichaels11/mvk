@@ -191,8 +191,8 @@ namespace mvk {
         vkDestroyPipeline(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    PipelineBindpoint GraphicsPipeline::getBindpoint() const {
-        return PipelineBindpoint::GRAPHICS;
+    PipelineBindPoint GraphicsPipeline::getBindPoint() const {
+        return PipelineBindPoint::GRAPHICS;
     }
 
     void GraphicsPipeline::release() {

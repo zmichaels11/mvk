@@ -32,8 +32,8 @@ namespace mvk {
         vkDestroyPipeline(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    PipelineBindpoint ComputePipeline::getBindpoint() const {
-        return PipelineBindpoint::COMPUTE;
+    PipelineBindPoint ComputePipeline::getBindPoint() const {
+        return PipelineBindPoint::COMPUTE;
     }
 
     void ComputePipeline::release() {

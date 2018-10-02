@@ -35,7 +35,7 @@ namespace mvk {
     }
 
     void CommandBuffer::bindDescriptorSet(const Pipeline * pipeline, int firstSet, const DescriptorSet * descriptorSet) {
-        auto bindPoint = static_cast<VkPipelineBindPoint> (pipeline->getBindpoint());
+        auto bindPoint = static_cast<VkPipelineBindPoint> (pipeline->getBindPoint());
         auto layout = pipeline->getPipelineLayout()->getHandle();
         auto set = descriptorSet->getHandle();
 
@@ -43,7 +43,7 @@ namespace mvk {
     }
 
     void CommandBuffer::bindPipeline(const Pipeline * pipeline) {
-        auto bindPoint = static_cast<VkPipelineBindPoint> (pipeline->getBindpoint());
+        auto bindPoint = static_cast<VkPipelineBindPoint> (pipeline->getBindPoint());
 
         vkCmdBindPipeline(_handle, bindPoint, pipeline->getHandle());
     }

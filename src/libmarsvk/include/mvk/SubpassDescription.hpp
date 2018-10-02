@@ -2,13 +2,13 @@
 
 #include <vector>
 
-#include "mvk/PipelineBindpoint.hpp"
+#include "mvk/PipelineBindPoint.hpp"
 #include "mvk/AttachmentReference.hpp"
 
 namespace mvk {
     struct SubpassDescription {
         unsigned int flags;
-        PipelineBindpoint pipelineBindpoint;
+        PipelineBindPoint pipelineBindPoint;
         std::vector<AttachmentReference> inputAttachments;
         std::vector<AttachmentReference> colorAttachments;
         std::vector<AttachmentReference> resolveAttachments;

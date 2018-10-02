@@ -62,7 +62,7 @@ namespace mvk {
 
         ~GraphicsPipeline();
 
-        virtual PipelineBindpoint getBindpoint() const;
+        virtual PipelineBindPoint getBindPoint() const;
 
         virtual void release();
 
