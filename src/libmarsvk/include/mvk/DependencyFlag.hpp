@@ -4,6 +4,7 @@
 
 namespace mvk {
     enum class DependencyFlag : unsigned int {
+        NONE = 0,
         BY_REGION = VK_DEPENDENCY_BY_REGION_BIT,
         DEVICE_GROUP = VK_DEPENDENCY_DEVICE_GROUP_BIT,
         VIEW_LOCAL = VK_DEPENDENCY_VIEW_LOCAL_BIT

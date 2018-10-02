@@ -21,6 +21,7 @@
 #include "mvk/PipelineCache.hpp"
 #include "mvk/PipelineLayoutCache.hpp"
 #include "mvk/QueueFamily.hpp"
+#include "mvk/RenderPass.hpp"
 #include "mvk/SemaphorePool.hpp"
 #include "mvk/ShaderModule.hpp"
 
@@ -110,6 +111,10 @@ namespace mvk {
 
         inline std::unique_ptr<ComputePipeline> createPipeline(const ComputePipeline::CreateInfo& createInfo) {
             return _pipelineCache->createPipeline(createInfo);
+        }
+
+        inline std::unique_ptr<RenderPass> createRenderPass(const RenderPass::CreateInfo& createInfo) {
+            return std::make_unique<RenderPass> (this, createInfo);
         }
 
         std::vector<QueueFamily *> getQueueFamilies() const;

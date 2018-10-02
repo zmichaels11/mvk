@@ -3,18 +3,34 @@
 #include "volk.h"
 
 #include <memory>
+#include <vector>
 
+#include "mvk/ClearValue.hpp"
 #include "mvk/CommandBufferUsageFlag.hpp"
 #include "mvk/CommandBufferLevel.hpp"
+#include "mvk/Rect2D.hpp"
 #include "mvk/ShaderStage.hpp"
+#include "mvk/SubpassContents.hpp"
 
 namespace mvk {
     class CommandPool;
+    class Framebuffer;
+    class RenderPass;
     class DescriptorSet;
     class Device;
     class Pipeline;
 
     class CommandBuffer {
+    public:
+        struct RenderPassBeginInfo {
+            Framebuffer * framebuffer;
+            RenderPass * renderPass;
+            SubpassContents subpassContents;
+            Rect2D renderArea;
+            std::vector<ClearValue> clearValues;
+        };
+
+    private:
         CommandPool * _pool;
         CommandBufferLevel _level;
         VkCommandBuffer _handle;

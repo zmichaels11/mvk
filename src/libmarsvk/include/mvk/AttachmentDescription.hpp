@@ -15,5 +15,6 @@ namespace mvk {
         StoreOp stencilStoreOp;
         ImageLayout initialLayout;
         ImageLayout finalLayout;
+        int samples;
     };
 }
