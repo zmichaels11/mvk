@@ -113,6 +113,14 @@ namespace mvk {
             return _pipelineCache->createPipeline(createInfo);
         }
 
+        inline std::unique_ptr<GraphicsPipeline> createPipeline(const GraphicsPipeline::CreateInfo& createInfo, const RenderPass * renderPass) {
+            return _pipelineCache->createPipeline(createInfo, renderPass);
+        }
+
+        inline std::unique_ptr<GraphicsPipeline> createPipeline(const GraphicsPipeline::CreateInfo& createInfo, const std::unique_ptr<RenderPass>& renderPass) {
+            return createPipeline(createInfo, renderPass.get());
+        }
+
         inline std::unique_ptr<RenderPass> createRenderPass(const RenderPass::CreateInfo& createInfo) {
             return std::make_unique<RenderPass> (this, createInfo);
         }

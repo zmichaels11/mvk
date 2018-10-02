@@ -24,7 +24,7 @@ namespace mvk {
 
         virtual PipelineLayout * getPipelineLayout() const = 0;
 
-        virtual DescriptorSetLayout * getDescriptorSetLayout(std::ptrdiff_t index) const = 0;
+        virtual DescriptorSetLayout * getDescriptorSetLayout(int index) const = 0;
 
         virtual std::vector<DescriptorSetLayout * > getDescriptorSetLayouts() const = 0;
 

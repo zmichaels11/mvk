@@ -52,7 +52,7 @@ namespace mvk {
         return _layout;
     }
 
-    DescriptorSetLayout * ComputePipeline::getDescriptorSetLayout(std::ptrdiff_t index) const {
+    DescriptorSetLayout * ComputePipeline::getDescriptorSetLayout(int index) const {
         return _layout->getDescriptorSetLayout(index);
     }
 
