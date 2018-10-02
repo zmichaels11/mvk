@@ -2,6 +2,8 @@
 
 #include "volk.h"
 
+#include <memory>
+
 #include "mvk/Format.hpp"
 
 namespace mvk {
@@ -20,7 +22,7 @@ namespace mvk {
     private:
         VkBufferView _handle;
         CreateInfo _info;
-        Buffer * _buffer;
+        const Buffer * _buffer;
 
     public:
         void * userData;
@@ -28,7 +30,10 @@ namespace mvk {
         BufferView():
             _handle(nullptr) {}
 
-        BufferView(Buffer * buffer, const CreateInfo& info);
+        BufferView(const Buffer * buffer, const CreateInfo& info);
+
+        BufferView(const std::unique_ptr<Buffer>& buffer, const CreateInfo& info) :
+            BufferView(buffer.get(), info) {}
 
         BufferView(const BufferView&) = delete;
 
@@ -40,15 +45,15 @@ namespace mvk {
 
         BufferView& operator= (BufferView&&) = default;
 
-        inline VkBufferView getHandle() const {
+        inline VkBufferView getHandle() const noexcept {
             return _handle;
         }
 
-        inline const CreateInfo& getInfo() const {
+        inline const CreateInfo& getInfo() const noexcept {
             return _info;
         }
 
-        inline Buffer * getBuffer() const {
+        inline const Buffer * getBuffer() const noexcept {
             return _buffer;
         }
 

@@ -16,6 +16,7 @@
 #include "mvk/DescriptorSetLayoutCache.hpp"
 #include "mvk/Device.hpp"
 #include "mvk/FencePool.hpp"
+#include "mvk/Image.hpp"
 #include "mvk/MemoryUsage.hpp"
 #include "mvk/PipelineCache.hpp"
 #include "mvk/PipelineLayoutCache.hpp"
@@ -93,6 +94,10 @@ namespace mvk {
 
         inline std::unique_ptr<Buffer> createBuffer(const Buffer::CreateInfo& info, MemoryUsage memoryUsage) {
             return std::make_unique<Buffer> (this, info, memoryUsage);
+        }
+
+        inline std::unique_ptr<Image> createImage(const Image::CreateInfo& info, MemoryUsage memoryUsage) {
+            return std::make_unique<Image> (this, info, memoryUsage);
         }
 
         inline DescriptorSetLayout * allocateDescriptorSetLayout(const DescriptorSetLayout::CreateInfo& createInfo) {
