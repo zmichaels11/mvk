@@ -39,7 +39,12 @@ namespace mvk {
         }
         
         auto fileSize = getFileSize(fileName);
+
+#ifdef __APPLE__
+        auto pData = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
+#else
         auto pData = mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+#endif
 
         if (MAP_FAILED == pData) {
             throw std::runtime_error("Failed to map file: " + info.path);
