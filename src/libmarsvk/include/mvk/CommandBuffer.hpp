@@ -34,16 +34,6 @@ namespace mvk {
     class RenderPass;
 
     class CommandBuffer {
-    public:
-        struct RenderPassBeginInfo {
-            Framebuffer * framebuffer;
-            RenderPass * renderPass;
-            SubpassContents subpassContents;
-            Rect2D renderArea;
-            std::vector<ClearValue> clearValues;
-        };
-
-    private:
         CommandPool * _pool;
         CommandBufferLevel _level;
         VkCommandBuffer _handle;
@@ -72,7 +62,15 @@ namespace mvk {
             return _level;
         }
 
-        void beginRenderPass(const RenderPassBeginInfo& beginInfo);
+        void beginRenderPass(const Framebuffer * framebuffer, SubpassContents contents = SubpassContents::INLINE);
+
+        inline void beginRenderPass(const std::unique_ptr<Framebuffer>& framebuffer, SubpassContents contents = SubpassContents::INLINE) {
+            beginRenderPass(framebuffer.get(), contents);
+        }
+
+        inline void beginRenderPass(const Framebuffer& framebuffer, SubpassContents contents = SubpassContents::INLINE) {
+            beginRenderPass(&framebuffer, contents);
+        }
 
         void endRenderPass();
 
@@ -104,8 +102,6 @@ namespace mvk {
             bindVertexBuffer(binding, buffer.get(), offset);
         }
 
-        void bindVertexBuffers(int firstBinding, const std::vector<const Buffer *>& buffers, const std::vector<std::ptrdiff_t>& offsets);
-
         void bindIndexBuffer(const Buffer * buffer, std::ptrdiff_t offset, IndexType indexType);
 
         inline void bindIndexBuffer(const std::unique_ptr<Buffer>& buffer, std::ptrdiff_t offset, IndexType indexType) {
@@ -134,27 +130,38 @@ namespace mvk {
         void bindPipeline(const Pipeline * pipeline);
 
         template<class PipelineT>
-        inline void bindPipeline(std::unique_ptr<PipelineT>& pipeline) {
+        inline void bindPipeline(const std::unique_ptr<PipelineT>& pipeline) {
             bindPipeline(pipeline.get());
         }
 
         void dispatch(unsigned int groupsX, unsigned int groupsY = 1, unsigned int groupsZ = 1);
 
-        void dispatchIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride);
+        void dispatchIndirect(const Buffer * buffer, std::ptrdiff_t offset);
 
-        inline void dispatchIndirect(const std::unique_ptr<Buffer>& buffer, std::ptrdiff_t offset, int drawCount, int stride) {
-            dispatchIndirect(buffer.get(), offset, drawCount, stride);
+        inline void dispatchIndirect(const std::unique_ptr<Buffer>& buffer, std::ptrdiff_t offset) {
+            dispatchIndirect(buffer.get(), offset);
         }
 
-        void dispatchIndexedIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride);
+        void drawIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride);
 
-        inline void dispatchIndexedIndirect(const std::unique_ptr<Buffer>& buffer, std::ptrdiff_t offset, int drawCount, int stride) {
-            dispatchIndexedIndirect(buffer.get(), offset, drawCount, stride);
+        inline void drawIndirect(const std::unique_ptr<Buffer>& buffer, std::ptrdiff_t offset, int drawCount, int stride) {
+            drawIndirect(buffer.get(), offset, drawCount, stride);
+        }
+
+        void drawIndexedIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride);
+
+        inline void drawIndexedIndirect(const std::unique_ptr<Buffer>& buffer, std::ptrdiff_t offset, int drawCount, int stride) {
+            drawIndexedIndirect(buffer.get(), offset, drawCount, stride);
         }
 
         void end();
         
-        void pushConstants(const Pipeline * pipeline, ShaderStage stages, int offset, const void * data);
+        void pushConstants(const Pipeline * pipeline, ShaderStage stages, int offset, int size, const void * data);
+
+        template<class PipelineT>
+        inline void pushConstants(const std::unique_ptr<Pipeline>& pipeline, ShaderStage stages, int offset, int size, const void * data) {
+            pushConstants(pipeline.get(), stages, offset, size, data);
+        }
 
         void copyBufferToImage(
             const Buffer * src, std::ptrdiff_t bufferOffset, 

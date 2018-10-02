@@ -43,6 +43,10 @@ namespace mvk {
 
         Framebuffer& operator= (Framebuffer&&) = default;
 
+        inline VkFramebuffer getHandle() const noexcept {
+            return _handle;
+        }
+
         inline const ImageView * getAttachment(int index) const noexcept {
             return _attachments[index];
         }
