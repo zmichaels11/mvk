@@ -2,6 +2,9 @@
 
 #include "volk.h"
 
+#include "mvk/SurfaceFormat.hpp"
+
+#include <memory>
 #include <vector>
 
 namespace mvk {
@@ -13,8 +16,12 @@ namespace mvk {
     class Swapchain {
         struct Support {
             VkSurfaceCapabilitiesKHR capabilities;
-            VkSurfaceFormatKHR surfaceFormats;
+            std::vector<VkSurfaceFormatKHR> surfaceFormats;
             std::vector<VkPresentModeKHR> presentModes;
+
+            Support() {}
+
+            Support(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
         };
 
     public:
@@ -23,12 +30,18 @@ namespace mvk {
             QueueFamily * queueFamily;
             int width;
             int height;
+            SurfaceFormat surfaceFormat;
         };
 
         struct Backbuffer {
             Image * image;
             Semaphore * acquireSemaphore;
             int index;
+
+            Backbuffer(Image * image, Semaphore * acquireSemaphore, int index) :
+                image(image),
+                acquireSemaphore(acquireSemaphore),
+                index(index) {}
         };
 
     private:
@@ -39,7 +52,7 @@ namespace mvk {
         Support _support;
         int _width;
         int _height;
-        std::vector<Image *> _images;
+        std::vector<std::unique_ptr<Image>> _images;
 
     public:
         void * userData;
@@ -68,8 +81,15 @@ namespace mvk {
             return _height;
         }
 
-        inline const std::vector<Image *>& getImages() const noexcept {
-            return _images;
+        inline const std::vector<Image *> getImages() const noexcept {
+            auto images = std::vector<Image *> ();
+
+            images.reserve(_images.size());
+            for (const auto& image : _images) {
+                images.push_back(image.get());
+            }
+
+            return images;
         }
 
         inline VkSwapchainKHR getHandle() const noexcept {

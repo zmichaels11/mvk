@@ -24,6 +24,7 @@
 #include "mvk/RenderPass.hpp"
 #include "mvk/SemaphorePool.hpp"
 #include "mvk/ShaderModule.hpp"
+#include "mvk/Swapchain.hpp"
 
 namespace mvk {
     class PhysicalDevice;
@@ -123,6 +124,10 @@ namespace mvk {
 
         inline std::unique_ptr<RenderPass> createRenderPass(const RenderPass::CreateInfo& createInfo) {
             return std::make_unique<RenderPass> (this, createInfo);
+        }
+
+        inline std::unique_ptr<Swapchain> createSwapchain(const Swapchain::CreateInfo& createInfo) {
+            return std::make_unique<Swapchain> (this, createInfo);
         }
 
         std::vector<QueueFamily *> getQueueFamilies() const;

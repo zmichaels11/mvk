@@ -2,6 +2,7 @@
 
 #include "volk.h"
 
+#include <algorithm>
 #include <string>
 
 #include "mvk/AspectFlag.hpp"
@@ -10,6 +11,11 @@
 
 namespace mvk {
     namespace Util {
+        template<typename T>
+        constexpr T clamp(T value, T min, T max) {
+            return std::max(min, std::min(max, value));
+        }
+
         constexpr VkDeviceSize alignUp(VkDeviceSize a, VkDeviceSize b) {
             return (a + b - 1) / b * b;
         }
