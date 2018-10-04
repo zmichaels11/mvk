@@ -6,15 +6,19 @@
 #include <vector>
 
 #include "mvk/AccessFlag.hpp"
+#include "mvk/BufferMemoryBarrier.hpp"
 #include "mvk/ClearValue.hpp"
 #include "mvk/CommandBufferUsageFlag.hpp"
 #include "mvk/CommandBufferLevel.hpp"
+#include "mvk/DependencyFlag.hpp"
 #include "mvk/Extent2D.hpp"
 #include "mvk/Extent3D.hpp"
 #include "mvk/Filter.hpp"
 #include "mvk/ImageLayout.hpp"
+#include "mvk/ImageMemoryBarrier.hpp"
 #include "mvk/ImageSubresourceLayers.hpp"
 #include "mvk/IndexType.hpp"
+#include "mvk/MemoryBarrier.hpp"
 #include "mvk/PipelineStageFlag.hpp"
 #include "mvk/Offset2D.hpp"
 #include "mvk/Offset3D.hpp"
@@ -259,6 +263,31 @@ namespace mvk {
             std::size_t size) {
 
             copyBuffer(src.get(), dst.get(), srcOffset, dstOffset, size);
+        }
+
+        void pipelineBarrier(
+            PipelineStageFlag srcStageMask, PipelineStageFlag dstStageMask,
+            DependencyFlag dependencyFlags,
+            std::size_t memoryBarrierCount,
+            const MemoryBarrier * pMemoryBarriers,
+            std::size_t bufferMemoryBarrierCount,
+            const BufferMemoryBarrier * pBufferMemoryBarriers,
+            std::size_t imageMemoryBarrierCount,
+            const ImageMemoryBarrier * pImageMemoryBarriers);
+
+        inline void pipelineBarrier(
+            PipelineStageFlag srcStageMask, PipelineStageFlag dstStageMask,
+            DependencyFlag dependencyFlags,
+            const std::vector<MemoryBarrier>& memoryBarriers,
+            const std::vector<BufferMemoryBarrier>& bufferMemoryBarriers,
+            const std::vector<ImageMemoryBarrier>& imageMemoryBarriers) {
+
+            pipelineBarrier(
+                srcStageMask, dstStageMask, 
+                dependencyFlags, 
+                memoryBarriers.size(), memoryBarriers.data(), 
+                bufferMemoryBarriers.size(), bufferMemoryBarriers.data(), 
+                imageMemoryBarriers.size(), imageMemoryBarriers.data());
         }
     };
 }

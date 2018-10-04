@@ -1,5 +1,6 @@
 #include "mvk/CommandBuffer.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <stdexcept>
 
@@ -300,5 +301,92 @@ namespace mvk {
         region.size = static_cast<VkDeviceSize> (size);
 
         vkCmdCopyBuffer(_handle, src->getHandle(), dst->getHandle(), 1, &region);
+    }
+
+    void CommandBuffer::pipelineBarrier(
+            PipelineStageFlag srcStageMask, PipelineStageFlag dstStageMask,
+            DependencyFlag dependencyFlags,
+            std::size_t memoryBarrierCount,
+            const MemoryBarrier * pMemoryBarriers,
+            std::size_t bufferMemoryBarrierCount,
+            const BufferMemoryBarrier * pBufferMemoryBarriers,
+            std::size_t imageMemoryBarrierCount,
+            const ImageMemoryBarrier * pImageMemoryBarriers) {
+
+        auto memoryBarriers = std::vector<VkMemoryBarrier> ();
+        memoryBarriers.reserve(memoryBarrierCount);
+
+        std::for_each(pMemoryBarriers, pMemoryBarriers + memoryBarrierCount, [&](const auto& barrier) {
+            auto memoryBarrier = VkMemoryBarrier {};
+            memoryBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+            memoryBarrier.srcAccessMask = static_cast<VkAccessFlags> (barrier.srcAccessMask);
+            memoryBarrier.dstAccessMask = static_cast<VkAccessFlags> (barrier.dstAccessMask);
+
+            memoryBarriers.push_back(memoryBarrier);
+        });
+
+        auto bufferMemoryBarriers = std::vector<VkBufferMemoryBarrier> ();
+        bufferMemoryBarriers.reserve(bufferMemoryBarrierCount);
+
+        std::for_each(pBufferMemoryBarriers, pBufferMemoryBarriers + memoryBarrierCount, [&](const auto& barrier) {
+            auto bufferMemoryBarrier = VkBufferMemoryBarrier {};
+            bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+            bufferMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags> (barrier.srcAccessMask);
+            bufferMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags> (barrier.dstAccessMask);
+            bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+            if (barrier.srcQueueFamily) {
+                bufferMemoryBarrier.srcQueueFamilyIndex = static_cast<uint32_t> (barrier.srcQueueFamily->getIndex());
+            }
+
+            if (barrier.dstQueueFamily) {
+                bufferMemoryBarrier.dstQueueFamilyIndex = static_cast<uint32_t> (barrier.dstQueueFamily->getIndex());
+            }
+
+            bufferMemoryBarrier.buffer = barrier.buffer->getHandle();
+            bufferMemoryBarrier.offset = static_cast<VkDeviceSize> (barrier.offset);
+            bufferMemoryBarrier.size = static_cast<VkDeviceSize> (barrier.size);
+
+            bufferMemoryBarriers.push_back(bufferMemoryBarrier);
+        });
+
+        auto imageMemoryBarriers = std::vector<VkImageMemoryBarrier> ();
+        imageMemoryBarriers.reserve(imageMemoryBarrierCount);
+
+        std::for_each(pImageMemoryBarriers, pImageMemoryBarriers + imageMemoryBarrierCount, [&](const auto& barrier) {
+            auto imageMemoryBarrier = VkImageMemoryBarrier {};
+            imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            imageMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags> (barrier.srcAccessMask);
+            imageMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags> (barrier.dstAccessMask);
+            imageMemoryBarrier.oldLayout = static_cast<VkImageLayout> (barrier.oldLayout);
+            imageMemoryBarrier.newLayout = static_cast<VkImageLayout> (barrier.newLayout);
+            imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+            if (barrier.srcQueueFamily) {
+                imageMemoryBarrier.srcQueueFamilyIndex = static_cast<uint32_t> (barrier.srcQueueFamily->getIndex());
+            }
+
+            if (barrier.dstQueueFamily) {
+                imageMemoryBarrier.dstQueueFamilyIndex = static_cast<uint32_t> (barrier.dstQueueFamily->getIndex());
+            }
+
+            imageMemoryBarrier.image = barrier.image->getHandle();
+            imageMemoryBarrier.subresourceRange.aspectMask = static_cast<VkImageAspectFlags> (barrier.subresourceRange.aspectMask);
+            imageMemoryBarrier.subresourceRange.baseMipLevel = static_cast<uint32_t> (barrier.subresourceRange.baseMipLevel);
+            imageMemoryBarrier.subresourceRange.levelCount = static_cast<uint32_t> (barrier.subresourceRange.levelCount);
+            imageMemoryBarrier.subresourceRange.baseArrayLayer = static_cast<uint32_t> (barrier.subresourceRange.baseArrayLayer);
+            imageMemoryBarrier.subresourceRange.layerCount = static_cast<uint32_t> (barrier.subresourceRange.layerCount);
+
+            imageMemoryBarriers.push_back(imageMemoryBarrier);
+        });
+
+        vkCmdPipelineBarrier(
+            _handle, 
+            static_cast<VkPipelineStageFlags> (srcStageMask), static_cast<VkPipelineStageFlags> (dstStageMask), static_cast<VkDependencyFlags> (dependencyFlags), 
+            memoryBarriers.size(), memoryBarriers.data(),
+            bufferMemoryBarriers.size(), bufferMemoryBarriers.data(),
+            imageMemoryBarriers.size(), imageMemoryBarriers.data());
     }
 }
