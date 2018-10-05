@@ -278,6 +278,7 @@ namespace mvk {
         imageMemoryBarrier.newLayout = static_cast<VkImageLayout> (newLayout);
         imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        imageMemoryBarrier.image = image->getHandle();
 
         auto subresourceRange = image->getFullRange();
 
@@ -385,8 +386,8 @@ namespace mvk {
         vkCmdPipelineBarrier(
             _handle, 
             static_cast<VkPipelineStageFlags> (srcStageMask), static_cast<VkPipelineStageFlags> (dstStageMask), static_cast<VkDependencyFlags> (dependencyFlags), 
-            memoryBarriers.size(), memoryBarriers.data(),
-            bufferMemoryBarriers.size(), bufferMemoryBarriers.data(),
-            imageMemoryBarriers.size(), imageMemoryBarriers.data());
+            memoryBarriers.size(), memoryBarriers.empty() ? nullptr : memoryBarriers.data(),
+            bufferMemoryBarriers.size(), bufferMemoryBarriers.empty() ? nullptr : bufferMemoryBarriers.data(),
+            imageMemoryBarriers.size(), imageMemoryBarriers.empty() ? nullptr : imageMemoryBarriers.data());
     }
 }

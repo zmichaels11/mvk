@@ -5,7 +5,6 @@
 #include <cstdio>
 
 #include <algorithm>
-#include <iostream>
 #include <stdexcept>
 #include <queue>
 #include <vector>
@@ -27,7 +26,7 @@ int main(int argc, char ** argv) {
         throw std::runtime_error("Failed to init GLFW!");
     }
 
-    //mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
+    mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
     //mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
     mvk::Instance::enableRequiredGLFWExtensions();
 
@@ -204,7 +203,7 @@ int main(int argc, char ** argv) {
     auto pVertices = pDevice->createBuffer(bufferCI, mvk::MemoryUsage::CPU_TO_GPU);
     pVertices->mapping<Vertex>([](auto verts) {
         verts[0].x = -0.5F;
-        verts[0].y = 0.0F;
+        verts[0].y = 0.5F;
         verts[0].color = 0xFF0000FF;
 
         verts[1].x = 0.5F;
@@ -264,8 +263,8 @@ int main(int argc, char ** argv) {
 
         auto dTime = (now - lastTime) * 0.001;
 
-        if (dTime > 5.0) {
-            std::cout << "FPS: " << (frames / dTime) << std::endl;
+        if (dTime > 1.0) {
+            std::printf("FPS: %.2f\n", (frames / dTime));
             frames = 0;
             lastTime = now;
         }

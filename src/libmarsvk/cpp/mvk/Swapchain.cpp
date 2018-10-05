@@ -188,6 +188,8 @@ namespace mvk {
             imageCI.usage = ImageUsageFlag::COLOR_ATTACHMENT | ImageUsageFlag::TRANSFER_DST;
             imageCI.sharingMode = SharingMode::EXCLUSIVE;
             imageCI.initialLayout = ImageLayout::PRESENT_SRC_KHR;
+            imageCI.mipLevels = 1;
+            imageCI.arrayLayers = 1;
 
             _images.push_back(std::make_unique<Image> (pDevice, imageCI, handle));
         }
