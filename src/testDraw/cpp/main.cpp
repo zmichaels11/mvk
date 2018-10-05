@@ -27,7 +27,7 @@ int main(int argc, char ** argv) {
     }
 
     mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
-    //mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
+    mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
     mvk::Instance::enableRequiredGLFWExtensions();
 
     auto& instance = mvk::Instance::getCurrent();
@@ -261,7 +261,7 @@ int main(int argc, char ** argv) {
 
         frames++;
 
-        auto dTime = (now - lastTime) * 0.001;
+        auto dTime = now - lastTime;
 
         if (dTime > 1.0) {
             std::printf("FPS: %.2f\n", (frames / dTime));
