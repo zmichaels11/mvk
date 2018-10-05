@@ -28,8 +28,6 @@ namespace mvk {
         struct CreateInfo {
             VkSurfaceKHR surface;
             QueueFamily * queueFamily;
-            int width;
-            int height;
             SurfaceFormat surfaceFormat;
         };
 
@@ -61,7 +59,15 @@ namespace mvk {
             _device(nullptr),
             _handle(VK_NULL_HANDLE) {}
 
-        Swapchain(Device * device, const CreateInfo& createInfo);
+        Swapchain(Device * device, const CreateInfo& createInfo) :
+            _info(createInfo),
+            _device(device),
+            _handle(VK_NULL_HANDLE),
+            _presentMode(VK_PRESENT_MODE_FIFO_KHR),
+            _support(),
+            _width(0),
+            _height(0),
+            _images() {}
 
         Swapchain(const Swapchain&) = delete;
 

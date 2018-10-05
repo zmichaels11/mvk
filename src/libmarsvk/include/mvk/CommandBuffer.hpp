@@ -163,7 +163,7 @@ namespace mvk {
         void pushConstants(const Pipeline * pipeline, ShaderStage stages, int offset, int size, const void * data);
 
         template<class PipelineT>
-        inline void pushConstants(const std::unique_ptr<Pipeline>& pipeline, ShaderStage stages, int offset, int size, const void * data) {
+        inline void pushConstants(const std::unique_ptr<PipelineT>& pipeline, ShaderStage stages, int offset, int size, const void * data) {
             pushConstants(pipeline.get(), stages, offset, size, data);
         }
 

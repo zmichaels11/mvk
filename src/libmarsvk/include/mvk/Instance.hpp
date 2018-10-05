@@ -59,5 +59,9 @@ namespace mvk {
             }
 
             std::vector<PhysicalDevice *> getPhysicalDevices() const;
+
+            inline operator VkInstance() const noexcept {
+                return _handle;
+            }
     };
 }

@@ -20,7 +20,19 @@ namespace mvk {
     public:
         CommandPool(const QueueFamily * queueFamily, CommandPoolCreateFlag flags);
 
+        CommandPool():
+            _handle(VK_NULL_HANDLE),
+            _queueFamily(nullptr) {}
+
+        CommandPool(const CommandPool&) = delete;
+
+        CommandPool(CommandPool&&) = default;
+
         ~CommandPool();
+
+        CommandPool& operator= (const CommandPool&) = delete;
+
+        CommandPool& operator= (CommandPool&&) = default;
 
         Device * getDevice() const;
 

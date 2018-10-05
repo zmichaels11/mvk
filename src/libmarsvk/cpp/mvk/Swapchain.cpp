@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <thread>
 
@@ -62,13 +63,6 @@ namespace mvk {
         presentModes.resize(presentModeCount);
 
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
-    }
-
-    Swapchain::Swapchain(Device * device, const Swapchain::CreateInfo& createInfo) {
-        _device = device;
-        _info = createInfo;
-
-        resize(createInfo.width, createInfo.height);
     }
 
     Swapchain::~Swapchain() {

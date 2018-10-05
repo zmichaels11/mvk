@@ -4,6 +4,7 @@
 
 #include "mvk/ImageView.hpp"
 
+#include <memory>
 #include <vector>
 
 namespace mvk {
@@ -31,7 +32,10 @@ namespace mvk {
             _handle(VK_NULL_HANDLE),
             _renderPass(nullptr) {}
 
-        Framebuffer(const RenderPass * renderPass, const CreateInfo& createInfo, const std::vector<const ImageView *> attachments);
+        Framebuffer(const RenderPass * renderPass, const CreateInfo& createInfo, const std::vector<const ImageView *>& attachments);
+
+        Framebuffer(const std::unique_ptr<RenderPass>& renderPass, const CreateInfo& createInfo, const std::vector<const ImageView *>& attachments) :
+            Framebuffer(renderPass.get(), createInfo, attachments) {}
 
         Framebuffer(const Framebuffer&) = delete;
 

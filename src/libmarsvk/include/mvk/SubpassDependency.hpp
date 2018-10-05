@@ -14,4 +14,6 @@ namespace mvk {
         AccessFlag dstAccessMask;
         DependencyFlag dependencyFlags;
     };
+
+    constexpr int SUBPASS_EXTERNAL = static_cast<int> (VK_SUBPASS_EXTERNAL);
 }

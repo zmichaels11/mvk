@@ -4,7 +4,7 @@
 #include "mvk/RenderPass.hpp"
 
 namespace mvk {
-    Framebuffer::Framebuffer(const RenderPass * renderPass, const CreateInfo& createInfo, const std::vector<const ImageView *> attachments) {
+    Framebuffer::Framebuffer(const RenderPass * renderPass, const CreateInfo& createInfo, const std::vector<const ImageView *>& attachments) {
         _renderPass = renderPass;
         _info = createInfo;
         _attachments = attachments;

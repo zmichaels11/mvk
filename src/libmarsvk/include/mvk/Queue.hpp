@@ -59,6 +59,14 @@ namespace mvk {
     public:
         Queue(QueueFamily * queueFamily, int queueIndex);
 
+        Queue(const Queue&) = delete;
+
+        Queue(Queue&&) = default;
+
+        Queue& operator= (const Queue&) = delete;
+
+        Queue& operator= (Queue&&) = default;
+
         inline QueueFamily * getQueueFamily() const noexcept {
             return _queueFamily;
         }

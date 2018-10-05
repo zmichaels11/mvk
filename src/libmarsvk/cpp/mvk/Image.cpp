@@ -47,7 +47,6 @@ namespace mvk {
     Image::~Image() {
         if (VK_NULL_HANDLE != _memory) {
             vmaDestroyImage(getDevice()->getMemoryAllocator(), _handle, _memory);
-        } else {
             vkDestroyImage(getDevice()->getHandle(), _handle, nullptr);
         }
     }

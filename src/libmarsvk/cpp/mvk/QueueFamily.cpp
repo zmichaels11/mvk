@@ -1,8 +1,10 @@
 #include "mvk/QueueFamily.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <memory>
+#include <utility>
 
 #include "mvk/Device.hpp"
 #include "mvk/PhysicalDevice.hpp"
@@ -12,8 +14,6 @@ namespace mvk {
     namespace {
         constexpr int ALL_QUEUES = -1;
         constexpr int MAX_QUEUES = 1;
-
-        thread_local std::map<int, std::unique_ptr<CommandPool>> _commandPools;
     }
 
     QueueFamily::QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties) {
@@ -32,6 +32,8 @@ namespace mvk {
         for (int i = 0; i < nQueues; i++) {
             _queues.push_back(std::make_unique<Queue> (this, i));
         }
+
+        _commandPool = nullptr;
     }
 
     QueueFlag QueueFamily::getFlags() const {
@@ -46,17 +48,15 @@ namespace mvk {
         return VK_TRUE == isSupported;
     }
 
-    CommandPool * QueueFamily::getCurrentCommandPool() const {
-        auto& pPool = _commandPools[_index];
-
-        if (nullptr == pPool) {
-            pPool = std::make_unique<CommandPool> (this, CommandPoolCreateFlag::CREATE_RESET_COMMAND_BUFFER);
+    CommandPool * QueueFamily::getCurrentCommandPool() {
+        if (_commandPool == nullptr) {
+            _commandPool = std::make_unique<CommandPool> (this, CommandPoolCreateFlag::CREATE_RESET_COMMAND_BUFFER);
         }
-
-        return pPool.get();
+        
+        return _commandPool.get();
     }
 
     void QueueFamily::detach() {
-        _commandPools[_index] = nullptr;
+        //TODO: this should destroy thread_local storage
     }
 }

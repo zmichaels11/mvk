@@ -1,5 +1,8 @@
 #include "mvk/CommandPool.hpp"
 
+#include <iostream>
+#include <stdexcept>
+
 #include "mvk/Device.hpp"
 #include "mvk/QueueFamily.hpp"
 #include "mvk/Util.hpp"
@@ -22,10 +25,15 @@ namespace mvk {
     }
 
     CommandPool::~CommandPool() {
+        std::cout << "Freeing CommandPool!" << std::endl;
         vkDestroyCommandPool(getDevice()->getHandle(), _handle, nullptr);
     }
 
     Device * CommandPool::getDevice() const {
+        if (_queueFamily == nullptr) {
+            throw std::runtime_error("CommandPool is not valid!");
+        }
+
         return _queueFamily->getDevice();
     }
 

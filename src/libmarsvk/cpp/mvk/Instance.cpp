@@ -5,9 +5,11 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <set>
 
 #include "volk.h"
+#include <GLFW/glfw3.h>
 
 #include "mvk/PhysicalDevice.hpp"
 
@@ -25,6 +27,15 @@ namespace mvk {
         _enabledLayers.insert(layerName);
     }
 
+    void Instance::enableRequiredGLFWExtensions() {
+        uint32_t requiredGLFWExtensions = 0;
+        auto extensions = glfwGetRequiredInstanceExtensions(&requiredGLFWExtensions);
+
+        std::for_each(extensions, extensions + requiredGLFWExtensions, [](auto extName) {
+            _enabledExtensions.insert(extName);
+        });
+    }
+
     Instance::Instance() {
         if (VK_SUCCESS != volkInitialize()) {
             throw std::runtime_error("Volk could not be initialized!");
@@ -37,7 +48,7 @@ namespace mvk {
         applicationInfo.pEngineName = "mvk";
         applicationInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         
-#ifdef defined(DEBUG) || defined(NDEBUG) || defined(_DEBUG)
+#if defined(DEBUG) || defined(NDEBUG) || defined(_DEBUG)
         _enabledLayers.insert("VK_LAYER_LUNARG_standard_validation");
 #endif
 

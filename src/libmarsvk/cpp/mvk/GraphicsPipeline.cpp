@@ -1,5 +1,6 @@
 #include "mvk/GraphicsPipeline.hpp"
 
+#include <iostream>
 #include <memory>
 
 #include "mvk/Device.hpp"
@@ -136,7 +137,7 @@ namespace mvk {
         tessellationState.patchControlPoints = static_cast<uint32_t> (createInfo.tessellationState.patchControlPoints);
 
         auto attachments = std::vector<VkPipelineColorBlendAttachmentState> ();
-        attachments.resize(createInfo.colorBlendState.attachments.size());
+        attachments.reserve(createInfo.colorBlendState.attachments.size());
 
         for (const auto& attachment : createInfo.colorBlendState.attachments) {
             auto vkcb = VkPipelineColorBlendAttachmentState {};
