@@ -102,11 +102,13 @@ namespace mvk {
         _descriptorSetLayoutCache = std::make_unique<DescriptorSetLayoutCache> (this);
         _pipelineLayoutCache = std::make_unique<PipelineLayoutCache> (this);
         _pipelineCache = std::make_unique<PipelineCache> (this);
+        _samplerCache = std::make_unique<SamplerCache> (this);
     }
 
     Device::~Device() {
         waitIdle();
 
+        _samplerCache = nullptr;
         _pipelineLayoutCache = nullptr;
         _pipelineCache = nullptr;
         _descriptorSetLayoutCache = nullptr;

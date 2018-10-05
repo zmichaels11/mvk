@@ -18,7 +18,7 @@ namespace mvk {
             throw std::runtime_error("Unable to release Pipeline! PipelineLayout does not belong to PipelineLayoutCache!");
         }
 
-        pLayout->references -= 0;
+        pLayout->references -= 1;
 
         if (0 == pLayout->references) {
             _layouts.erase(it);

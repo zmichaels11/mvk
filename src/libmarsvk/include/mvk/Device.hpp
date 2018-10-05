@@ -22,6 +22,7 @@
 #include "mvk/PipelineLayoutCache.hpp"
 #include "mvk/QueueFamily.hpp"
 #include "mvk/RenderPass.hpp"
+#include "mvk/SamplerCache.hpp"
 #include "mvk/SemaphorePool.hpp"
 #include "mvk/ShaderModule.hpp"
 #include "mvk/Swapchain.hpp"
@@ -41,6 +42,7 @@ namespace mvk {
         std::unique_ptr<DescriptorSetLayoutCache> _descriptorSetLayoutCache;
         std::unique_ptr<PipelineLayoutCache> _pipelineLayoutCache;
         std::unique_ptr<PipelineCache> _pipelineCache;
+        std::unique_ptr<SamplerCache> _samplerCache;
         VmaAllocator _allocator;
 
     public:
@@ -128,6 +130,10 @@ namespace mvk {
 
         inline std::unique_ptr<Swapchain> createSwapchain(const Swapchain::CreateInfo& createInfo) {
             return std::make_unique<Swapchain> (this, createInfo);
+        }
+
+        inline Sampler * allocateSampler(const Sampler::CreateInfo& createInfo) {
+            return _samplerCache->allocate(createInfo);
         }
 
         std::vector<QueueFamily *> getQueueFamilies() const;
