@@ -35,6 +35,8 @@ namespace mvk {
 
         QueueFamily(QueueFamily&&) = default;
 
+        ~QueueFamily();
+
         QueueFamily& operator= (const QueueFamily&) = delete;
 
         QueueFamily& operator= (QueueFamily&&) = default;

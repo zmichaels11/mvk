@@ -107,12 +107,13 @@ namespace mvk {
     Device::~Device() {
         waitIdle();
 
-        _pipelineLayoutCache.reset();
-        _pipelineCache.reset();
-        _descriptorSetLayoutCache.reset();
-        _semaphorePool.reset();
-        _fencePool.reset();
+        _pipelineLayoutCache = nullptr;
+        _pipelineCache = nullptr;
+        _descriptorSetLayoutCache = nullptr;
+        _semaphorePool = nullptr;
+        _fencePool = nullptr;
         _shaderCache.clear();
+        _queueFamilies.clear();
 
         vmaDestroyAllocator(_allocator);
 

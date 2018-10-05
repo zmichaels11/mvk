@@ -207,11 +207,11 @@ int main(int argc, char ** argv) {
         verts[0].color = 0xFF0000FF;
 
         verts[1].x = 0.5F;
-        verts[1].y = -0.5F;
+        verts[1].y = 0.5F;
         verts[1].color = 0xFFFF00FF;
 
         verts[2].x = 0.0F;
-        verts[2].y = 0.5F;
+        verts[2].y = -0.5F;
         verts[2].color = 0xFF00FF00;
     });
 
@@ -272,7 +272,6 @@ int main(int argc, char ** argv) {
 
     pDevice->waitIdle();
     pDrawCommand = nullptr;
-    pQueueFamily->detach();
 
     glfwDestroyWindow(pWindow);
     glfwTerminate();

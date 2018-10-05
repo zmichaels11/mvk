@@ -36,6 +36,11 @@ namespace mvk {
         _commandPool = nullptr;
     }
 
+    QueueFamily::~QueueFamily() {
+        _queues.clear();
+        detach();
+    }
+
     QueueFlag QueueFamily::getFlags() const {
         return static_cast<QueueFlag> (_properties.queueFlags);
     }
@@ -57,6 +62,7 @@ namespace mvk {
     }
 
     void QueueFamily::detach() {
+        _commandPool = nullptr;
         //TODO: this should destroy thread_local storage
     }
 }
