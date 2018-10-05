@@ -1,6 +1,5 @@
 #include "mvk/CommandPool.hpp"
 
-#include <iostream>
 #include <stdexcept>
 
 #include "mvk/Device.hpp"
@@ -25,7 +24,6 @@ namespace mvk {
     }
 
     CommandPool::~CommandPool() {
-        std::cout << "Freeing CommandPool!" << std::endl;
         vkDestroyCommandPool(getDevice()->getHandle(), _handle, nullptr);
     }
 
