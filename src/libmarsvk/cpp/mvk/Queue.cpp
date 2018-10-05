@@ -21,9 +21,6 @@ namespace mvk {
         _handle = VK_NULL_HANDLE;
 
         vkGetDeviceQueue(pDevice->getHandle(), queueFamily->getIndex(), queueIndex, &_handle);
-
-        std::cout << "Got Queue: " << _queueIndex << std::endl;
-        std::cout << "QueueFamily: " << queueFamily->getIndex() << std::endl;
     }
 
     Device * Queue::getDevice() const {
@@ -144,8 +141,6 @@ namespace mvk {
         imageMemoryBarriers[1].dstQueueFamily = nullptr;
         imageMemoryBarriers[1].image = backBuffer.image;
         imageMemoryBarriers[1].subresourceRange = backBuffer.image->getSubresourceRange(0);
-
-        std::cout << "QueueFamily: " << std::dec << _queueFamily->getIndex() << std::endl;
 
         auto cmd = acquireCommandBuffer();
         cmd.imageAcquireSemaphore = backBuffer.acquireSemaphore;

@@ -71,6 +71,10 @@ namespace mvk {
             return _queueFamily;
         }
 
+        inline int getIndex() const noexcept {
+            return _queueIndex;
+        }
+
         Device * getDevice() const;
 
         void waitIdle();

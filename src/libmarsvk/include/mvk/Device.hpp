@@ -33,7 +33,7 @@ namespace mvk {
         PhysicalDevice * _physicalDevice;
         VkDevice _handle;
         std::set<std::string> _enabledExtensions;
-        std::unique_ptr<QueueFamily[]> _queueFamilies;
+        std::vector<std::unique_ptr<QueueFamily>> _queueFamilies;
         std::uint32_t _queueFamilyCount;
         std::vector<std::unique_ptr<ShaderModule>> _shaderCache;
         std::unique_ptr<FencePool> _fencePool;
@@ -71,7 +71,7 @@ namespace mvk {
         }
 
         inline QueueFamily * getQueueFamily(std::ptrdiff_t index) const noexcept {
-            return _queueFamilies.get() + index;
+            return _queueFamilies[index].get();
         }
 
         inline std::uint32_t getQueueFamilyCount() const noexcept {
