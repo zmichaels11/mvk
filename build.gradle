@@ -24,12 +24,14 @@ model {
             binaries.all {
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     cppCompiler.args << "-std=c++14"
+                    cppCompiler.args << '-g'
                 } else if (toolChain instanceof VisualCpp) {
                     cppCompiler.args << "/std:c++14"
                 }
 
-                if (targetPlatform.operatingSystem.linux) {
+                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOS) {
                     linker.args << "-ldl"
+                    linker.args << "-lglfw"
                 }
             }
         }
@@ -37,7 +39,7 @@ model {
         testInit (NativeExecutableSpec) {
             sources {
                 cpp {
-                    lib library: "marsvk", linkage: "static"
+                    lib library: "marsvk"
 
                     source {
                         srcDir "src/testInit/cpp"
@@ -52,17 +54,13 @@ model {
                 } else if (toolChain instanceof VisualCpp) {
                     cppCompiler.args << "/std:c++14"
                 }
-
-                if (targetPlatform.operatingSystem.linux) {
-                    linker.args << "-ldl"
-                }
             }
         }
 
         testCompute (NativeExecutableSpec) {
             sources {
                 cpp {
-                    lib library: "marsvk", linkage: "static"
+                    lib library: "marsvk", linkage: 'static'
 
                     source {
                         srcDir "src/testCompute/cpp"
@@ -78,8 +76,36 @@ model {
                     cppCompiler.args << "/std:c++14"
                 }
 
-                if (targetPlatform.operatingSystem.linux) {
+                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOS) {
                     linker.args << "-ldl"
+                    linker.args << "-lglfw"
+                }
+            }
+        }
+
+        testDraw (NativeExecutableSpec) {
+            sources {
+                cpp {
+                    lib library: "marsvk", linkage: 'static'
+
+                    source {
+                        srcDir "src/testDraw/cpp"
+                        include "**/*.cpp"
+                    }
+                }
+            }
+
+            binaries.all {
+                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                    cppCompiler.args << "-std=c++14"
+                    cppCompiler.args << '-g'
+                } else if (toolChain instanceof VisualCpp) {
+                    cppCompiler.args << "/std:c++14"
+                }
+
+                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOS) {
+                    linker.args << "-ldl"
+                    linker.args << "-lglfw"
                 }
             }
         }

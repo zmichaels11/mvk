@@ -1,8 +1,8 @@
-#include "mvk/Instance.hpp"
-
 #include <algorithm>
 #include <iostream>
 #include <vector>
+
+#include "mvk/Instance.hpp"
 
 constexpr unsigned int WORKGROUP_SIZE = 32;
 constexpr unsigned int DATA_SIZE = 32;
@@ -10,37 +10,30 @@ constexpr int INPUT_BUFFER_BINDING = 0;
 constexpr int OUTPUT_BUFFER_BINDING = 1;
 
 int main(int argc, char ** argv) {
-    mvk::Instance::enableLayer("VK_LAYER_LUNARG_standard_validation");
-    //mvk::Instance::enableLayer("VK_LAYER_LUNARG_api_dump");
+    mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
+    //mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
 
     auto& instance = mvk::Instance::getCurrent();
     auto pPhysicalDevice = instance.getPhysicalDevice(0);
     auto pDevice = pPhysicalDevice->createDevice();
 
-    std::cout << "Compute Shader Squaring\n";
-    std::cout << "Inputs: [";
-
-    auto inputData = std::vector<float>();
-    for (unsigned int i = 0; i < DATA_SIZE; i++) {
-        inputData.push_back(static_cast<float> (i));
-        std::cout << inputData[i];
-
-        if (i < DATA_SIZE - 1) {
-            std::cout << ", ";
-        }
-    }
-
-    std::cout << "]" << std::endl;
-
     auto bufferCI = mvk::Buffer::CreateInfo {};
     bufferCI.usage = mvk::BufferUsageFlag::STORAGE_BUFFER;
-    bufferCI.size = inputData.size() * sizeof(float);
+    bufferCI.size = DATA_SIZE * sizeof(float);
 
     auto pInputBuffer = pDevice->createBuffer(bufferCI, mvk::MemoryUsage::CPU_ONLY);
 
-    pInputBuffer->mapping([&](auto pData) {
-        std::copy(inputData.begin(), inputData.end(), reinterpret_cast<float * > (pData));
+    std::cout << "Compute Shader Squaring\n";
+    std::cout << "Inputs: [";
+
+    pInputBuffer->mapping<float> ([&](auto pData) {
+        for (unsigned int i = 0; i < DATA_SIZE; i++) {
+            pData[i] = static_cast<float> (i);
+            std::cout << std::dec << i << ", ";
+        }
     });
+
+    std::cout << "]" << std::endl;
 
     auto pOutputBuffer = pDevice->createBuffer(bufferCI, mvk::MemoryUsage::CPU_ONLY);
 
@@ -86,7 +79,7 @@ int main(int argc, char ** argv) {
         pCommandBuffer->bindPipeline(pPipeline);
         pCommandBuffer->bindDescriptorSet(pPipeline, 0, pDescriptorSet);
 
-        auto gX = std::max(1u, static_cast<unsigned int> (inputData.size()) / WORKGROUP_SIZE);
+        auto gX = std::max(1u, DATA_SIZE / WORKGROUP_SIZE);
 
         pCommandBuffer->dispatch(gX);
         pCommandBuffer->end();
@@ -98,16 +91,10 @@ int main(int argc, char ** argv) {
 
     std::cout << "Output: [";
 
-    pOutputBuffer->mapping([&](auto pData) {
-        auto pResult = reinterpret_cast<float * > (pData);
-
-        for (int i = 0; i < DATA_SIZE; ++i) {
-            std::cout << pResult[i];
-
-            if (i < DATA_SIZE - 1) {
-                std::cout << ", ";
-            }
-        }
+    pOutputBuffer->mapping<float>([&](auto pData) {
+        std::for_each(pData, pData + DATA_SIZE, [](auto data) {
+            std::cout << data << ", ";
+        });
     });
 
     std::cout << "]" << std::endl;

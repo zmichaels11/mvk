@@ -7,7 +7,7 @@
 #include "mvk/Util.hpp"
 
 namespace mvk {
-    BufferView::BufferView(Buffer * buffer, const BufferView::CreateInfo& info) {
+    BufferView::BufferView(const Buffer * buffer, const BufferView::CreateInfo& info) {
         _buffer = buffer;
         _info = info;
 

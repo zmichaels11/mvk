@@ -4,6 +4,7 @@
 
 namespace mvk {
     enum class PipelineStageFlag : unsigned int {
+        NONE = 0,
         HOST = VK_PIPELINE_STAGE_HOST_BIT,
         TOP_OF_PIPE = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
         DRAW_INDIRECT = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,

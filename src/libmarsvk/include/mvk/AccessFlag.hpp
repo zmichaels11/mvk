@@ -3,6 +3,7 @@
 
 namespace mvk {
     enum class AccessFlag : unsigned int {
+        NONE = 0,
         INDIRECT_COMMAND_READ = VK_ACCESS_INDIRECT_COMMAND_READ_BIT,
         INDEX_READ = VK_ACCESS_INDEX_READ_BIT,
         VERTEX_ATTRIBUTE_READ = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,

@@ -9,7 +9,9 @@
 #include <string>
 #include <vector>
 
+#include "mvk/InstanceLayer.hpp"
 #include "mvk/PhysicalDevice.hpp"
+#include "mvk/Util.hpp"
 
 namespace mvk {
     class Instance {
@@ -32,6 +34,10 @@ namespace mvk {
         public:
             static void enableLayer(const std::string& layer);
 
+            inline static void enableLayer(const InstanceLayer& layer) {
+                enableLayer(Util::name(layer));
+            }
+
             static void enableRequiredGLFWExtensions();
 
             static void enableExtension(const std::string& extension);
@@ -53,5 +59,9 @@ namespace mvk {
             }
 
             std::vector<PhysicalDevice *> getPhysicalDevices() const;
+
+            inline operator VkInstance() const noexcept {
+                return _handle;
+            }
     };
 }

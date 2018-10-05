@@ -5,24 +5,35 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
-#include <vector>
+#include <stdexcept>
+#include <set>
 
 #include "volk.h"
+#include <GLFW/glfw3.h>
 
 #include "mvk/PhysicalDevice.hpp"
 
 namespace mvk {
     namespace {
-        std::vector<std::string> _enabledLayers;
-        std::vector<std::string> _enabledExtensions;
+        std::set<std::string> _enabledLayers;
+        std::set<std::string> _enabledExtensions;
     }
 
     void Instance::enableExtension(const std::string& extName) {
-        _enabledExtensions.push_back(extName);
+        _enabledExtensions.insert(extName);
     }
 
     void Instance::enableLayer(const std::string& layerName) {
-        _enabledLayers.push_back(layerName);
+        _enabledLayers.insert(layerName);
+    }
+
+    void Instance::enableRequiredGLFWExtensions() {
+        uint32_t requiredGLFWExtensions = 0;
+        auto extensions = glfwGetRequiredInstanceExtensions(&requiredGLFWExtensions);
+
+        std::for_each(extensions, extensions + requiredGLFWExtensions, [](auto extName) {
+            _enabledExtensions.insert(extName);
+        });
     }
 
     Instance::Instance() {
@@ -30,28 +41,32 @@ namespace mvk {
             throw std::runtime_error("Volk could not be initialized!");
         }
 
-        VkApplicationInfo applicationInfo {};
-
+        auto applicationInfo = VkApplicationInfo {};
         applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         applicationInfo.apiVersion = VK_API_VERSION_1_0;
         applicationInfo.pApplicationName = "MVKApp";
         applicationInfo.pEngineName = "mvk";
         applicationInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         
-        std::vector<const char *> pEnabledExtensionNames;
+#if defined(DEBUG) || defined(NDEBUG) || defined(_DEBUG)
+        _enabledLayers.insert("VK_LAYER_LUNARG_standard_validation");
+#endif
+
+        auto pEnabledExtensionNames = std::vector<const char *> ();
+        pEnabledExtensionNames.reserve(_enabledExtensions.size());
 
         for (auto& name : _enabledExtensions) {
             pEnabledExtensionNames.push_back(name.c_str());
         }
         
-        std::vector<const char *> pEnabledLayers;
+        auto pEnabledLayers = std::vector<const char *> ();
+        pEnabledLayers.reserve(_enabledLayers.size());
 
         for (auto& layerName : _enabledLayers) {
             pEnabledLayers.push_back(layerName.c_str());
         }
 
-        VkInstanceCreateInfo instanceCI {};
-
+        auto instanceCI = VkInstanceCreateInfo{};
         instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCI.pApplicationInfo = &applicationInfo;
         instanceCI.ppEnabledExtensionNames = pEnabledExtensionNames.data();

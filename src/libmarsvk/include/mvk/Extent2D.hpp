@@ -2,7 +2,12 @@
 
 namespace mvk {
     struct Extent2D {
-        unsigned int width;
-        unsigned int height;
+        int width;
+        int height;
     };
+
+    inline constexpr bool operator== (const Extent2D& lhs, const Extent2D& rhs) {
+        return lhs.width == rhs.width && lhs.height == rhs.height;
+    }
 }
+

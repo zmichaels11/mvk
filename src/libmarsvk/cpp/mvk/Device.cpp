@@ -61,12 +61,10 @@ namespace mvk {
 
         Util::vkAssert(vkCreateDevice(pdHandle, &deviceCI, nullptr, &_handle));
 
-        _queueFamilies = std::make_unique<QueueFamily[]> (_queueFamilyCount);
+        _queueFamilies.reserve(_queueFamilyCount);
 
         for (std::uint32_t i = 0; i < _queueFamilyCount; i++) {
-            auto qf = QueueFamily(this, i, pQueueFamilyProperties[i]);
-
-            std::swap(qf, _queueFamilies[i]);
+            _queueFamilies.push_back(std::make_unique<QueueFamily>(this, i, pQueueFamilyProperties[i]));
         }
 
         auto vmaVulkanFunctions = VmaVulkanFunctions {};
@@ -109,12 +107,13 @@ namespace mvk {
     Device::~Device() {
         waitIdle();
 
-        _pipelineLayoutCache.reset();
-        _pipelineCache.reset();
-        _descriptorSetLayoutCache.reset();
-        _semaphorePool.reset();
-        _fencePool.reset();
+        _pipelineLayoutCache = nullptr;
+        _pipelineCache = nullptr;
+        _descriptorSetLayoutCache = nullptr;
+        _semaphorePool = nullptr;
+        _fencePool = nullptr;
         _shaderCache.clear();
+        _queueFamilies.clear();
 
         vmaDestroyAllocator(_allocator);
 
@@ -142,7 +141,7 @@ namespace mvk {
         out.reserve(_queueFamilyCount);
 
         for (std::uint32_t i = 0; i < _queueFamilyCount; i++) {
-            out.push_back(_queueFamilies.get() + i);
+            out.push_back(_queueFamilies[i].get());
         }
 
         return out;

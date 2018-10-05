@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "mvk/PipelineBindpoint.hpp"
+#include "mvk/PipelineBindPoint.hpp"
 
 namespace mvk {
     class DescriptorSetLayout;
@@ -14,7 +14,7 @@ namespace mvk {
 
     class Pipeline {
     public:
-        virtual PipelineBindpoint getBindpoint() const = 0;
+        virtual PipelineBindPoint getBindPoint() const = 0;
 
         virtual void release() = 0;
 
@@ -24,7 +24,7 @@ namespace mvk {
 
         virtual PipelineLayout * getPipelineLayout() const = 0;
 
-        virtual DescriptorSetLayout * getDescriptorSetLayout(std::ptrdiff_t index) const = 0;
+        virtual DescriptorSetLayout * getDescriptorSetLayout(int index) const = 0;
 
         virtual std::vector<DescriptorSetLayout * > getDescriptorSetLayouts() const = 0;
 

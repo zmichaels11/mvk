@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstddef>
-
 #include "volk.h"
 
 #include "mvk/Pipeline.hpp"
@@ -36,7 +34,7 @@ namespace mvk {
             return _info;
         }
 
-        virtual PipelineBindpoint getBindpoint() const;
+        virtual PipelineBindPoint getBindPoint() const;
 
         virtual void release();
 
@@ -46,7 +44,7 @@ namespace mvk {
 
         virtual PipelineLayout * getPipelineLayout() const;
 
-        virtual DescriptorSetLayout * getDescriptorSetLayout(std::ptrdiff_t index) const;
+        virtual DescriptorSetLayout * getDescriptorSetLayout(int index) const;
 
         virtual std::vector<DescriptorSetLayout * > getDescriptorSetLayouts() const;
 

@@ -20,6 +20,9 @@ namespace mvk {
         Device * _device;
         VkQueueFamilyProperties _properties;
         std::vector<std::unique_ptr<Queue>> _queues;
+
+        //TODO: this should be thread_local
+        std::unique_ptr<CommandPool> _commandPool;
     
     public:
         QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties);
@@ -32,13 +35,15 @@ namespace mvk {
 
         QueueFamily(QueueFamily&&) = default;
 
+        ~QueueFamily();
+
         QueueFamily& operator= (const QueueFamily&) = delete;
 
         QueueFamily& operator= (QueueFamily&&) = default;
 
         QueueFlag getFlags() const;
 
-        CommandPool * getCurrentCommandPool() const;
+        CommandPool * getCurrentCommandPool();
 
         bool canPresent(VkSurfaceKHR surface) const;
 

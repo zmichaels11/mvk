@@ -32,8 +32,8 @@ namespace mvk {
         vkDestroyPipeline(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    PipelineBindpoint ComputePipeline::getBindpoint() const {
-        return PipelineBindpoint::COMPUTE;
+    PipelineBindPoint ComputePipeline::getBindPoint() const {
+        return PipelineBindPoint::COMPUTE;
     }
 
     void ComputePipeline::release() {
@@ -52,7 +52,7 @@ namespace mvk {
         return _layout;
     }
 
-    DescriptorSetLayout * ComputePipeline::getDescriptorSetLayout(std::ptrdiff_t index) const {
+    DescriptorSetLayout * ComputePipeline::getDescriptorSetLayout(int index) const {
         return _layout->getDescriptorSetLayout(index);
     }
 

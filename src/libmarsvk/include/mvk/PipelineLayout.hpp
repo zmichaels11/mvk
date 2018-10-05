@@ -34,7 +34,7 @@ namespace mvk {
             return _setLayouts;
         }
 
-        inline DescriptorSetLayout * getDescriptorSetLayout(std::ptrdiff_t index) const noexcept {
+        inline DescriptorSetLayout * getDescriptorSetLayout(int index) const noexcept {
             return _setLayouts[index];
         }
 

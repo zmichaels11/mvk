@@ -68,8 +68,16 @@ namespace mvk {
 
         void unmap();
 
-        inline void mapping(std::function<void(void*)> fn) {
+        inline void mapping(std::function<void(void *)> fn) {
             fn(map());
+            unmap();
+        }
+
+        template<class ptr_t>
+        inline void mapping(std::function<void(ptr_t *)> fn) {
+            auto pData = reinterpret_cast<ptr_t *> (map());
+
+            fn(pData);
             unmap();
         }
     };
