@@ -29,7 +29,7 @@ model {
                     cppCompiler.args << "/std:c++14"
                 }
 
-                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOS) {
+                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
                     linker.args << "-ldl"
                     linker.args << "-lglfw"
                 }
@@ -76,7 +76,7 @@ model {
                     cppCompiler.args << "/std:c++14"
                 }
 
-                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOS) {
+                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
                     linker.args << "-ldl"
                     linker.args << "-lglfw"
                 }
@@ -103,7 +103,7 @@ model {
                     cppCompiler.args << "/std:c++14"
                 }
 
-                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOS) {
+                if (targetPlatform.operatingSystem.linux || targetPlatform.operatingSystem.macOsX) {
                     linker.args << "-ldl"
                     linker.args << "-lglfw"
                 }
