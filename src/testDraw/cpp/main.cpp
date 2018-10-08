@@ -26,8 +26,8 @@ int main(int argc, char ** argv) {
         throw std::runtime_error("Failed to init GLFW!");
     }
 
-    mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
-    mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
+    //mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
+    //mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
     mvk::Instance::enableRequiredGLFWExtensions();
 
     auto& instance = mvk::Instance::getCurrent();
@@ -61,10 +61,13 @@ int main(int argc, char ** argv) {
     imageCI.extent.height = WINDOW_HEIGHT;
     imageCI.extent.depth = 1;
     imageCI.imageType = mvk::ImageType::IMAGE_2D;
-    imageCI.format = mvk::Format::R8G8B8A8_UNORM;
+    imageCI.format = mvk::Format::B8G8R8A8_UNORM; 
     imageCI.arrayLayers = 1;
     imageCI.mipLevels = 1;
     imageCI.samples = 1;
+    
+    //NOTE: A format that isn't copy-compatible with the backbuffer will force a more expensive image blit.
+    // You will have to pay for this anyway if you have extent mismatch
 
     auto pImage = pDevice->createImage(imageCI, mvk::MemoryUsage::GPU_ONLY);
     auto imageView = mvk::ImageView(pImage);
