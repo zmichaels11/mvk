@@ -152,7 +152,10 @@ namespace mvk {
             0, nullptr, 
             imageMemoryBarriers.size(), imageMemoryBarriers.data());
         
-        if (info.image->getInfo().extent == backBuffer.image->getInfo().extent) {
+        const auto srcInfo = info.image->getInfo();
+        const auto dstInfo = backBuffer.image->getInfo();
+
+        if (srcInfo.extent == dstInfo.extent && srcInfo.format == dstInfo.format) {
             cmd.commandBuffer->copyImage(
                 info.image, ImageLayout::TRANSFER_SRC,
                 backBuffer.image, ImageLayout::TRANSFER_DST,
