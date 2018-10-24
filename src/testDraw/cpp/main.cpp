@@ -12,6 +12,7 @@
 #include "mvk/Framebuffer.hpp"
 #include "mvk/Instance.hpp"
 #include "mvk/ImageView.hpp"
+#include "mvk/Surface.hpp"
 
 constexpr int WINDOW_WIDTH = 640;
 constexpr int WINDOW_HEIGHT = 480;
@@ -26,31 +27,30 @@ int main(int argc, char ** argv) {
         throw std::runtime_error("Failed to init GLFW!");
     }
 
-    //mvk::Instance::enableLayer(mvk::InstanceLayer::STANDARD_VALIDATION);
     //mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
     mvk::Instance::enableRequiredGLFWExtensions();
 
     auto& instance = mvk::Instance::getCurrent();
-    auto pPhysicalDevice = instance.getPhysicalDevice(0);
-    auto pDevice = pPhysicalDevice->createDevice(std::set<std::string>({VK_KHR_SWAPCHAIN_EXTENSION_NAME}));
+    auto& physicalDevice = instance.getPhysicalDevice(0);
+    auto pDevice = physicalDevice.createDevice(std::set<std::string>({VK_KHR_SWAPCHAIN_EXTENSION_NAME}));
 
     glfwDefaultWindowHints();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     auto pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Test Draw", nullptr, nullptr);
-    VkSurfaceKHR surface = VK_NULL_HANDLE;
-
-    glfwCreateWindowSurface(instance, pWindow, nullptr, &surface);
+    auto pSurface = std::make_unique<mvk::Surface> (instance, pWindow);
 
     auto pQueueFamily = pDevice->getQueueFamily(0);
 
-    if (!pQueueFamily->canPresent(surface)) {
+    if (!pQueueFamily->canPresent(pSurface)) {
         throw std::runtime_error("Selected QueueFamily cannot present image!");
     }
 
     auto swapchainCI = mvk::Swapchain::CreateInfo {};    
     swapchainCI.queueFamily = pQueueFamily;
-    swapchainCI.surface = surface;
+    swapchainCI.surface = pSurface.get();
+    swapchainCI.surfaceFormat.format = mvk::Format::B8G8R8A8_UNORM;
+    swapchainCI.presentMode = mvk::PresentMode::FIFO;
 
     auto pSwapchain = pDevice->createSwapchain(swapchainCI);
     pSwapchain->resize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -133,34 +133,17 @@ int main(int argc, char ** argv) {
         pipelineCI.layoutInfo.pushConstantRanges.push_back(pushConstantRange);
     }
 
-    {
-        auto vertexStageCI = mvk::PipelineShaderStageCreateInfo {};
-        vertexStageCI.stage = mvk::ShaderStage::VERTEX;
-        vertexStageCI.moduleInfo.path = "shaders/testDraw/tris2D_colored.vert.spv";
-        vertexStageCI.name = "main";
-
-        auto fragmentStageCI = mvk::PipelineShaderStageCreateInfo {};
-        fragmentStageCI.stage = mvk::ShaderStage::FRAGMENT;
-        fragmentStageCI.moduleInfo.path = "shaders/testDraw/tris2D_colored.frag.spv";
-        fragmentStageCI.name = "main";
-
-        pipelineCI.stages.push_back(vertexStageCI);
-        pipelineCI.stages.push_back(fragmentStageCI);
-    }
-
+    
+    pipelineCI.stages.push_back(mvk::PipelineShaderStageCreateInfo::init(mvk::ShaderStage::VERTEX, "shaders/testDraw/tris2D_colored.vert.spv"));
+    pipelineCI.stages.push_back(mvk::PipelineShaderStageCreateInfo::init(mvk::ShaderStage::FRAGMENT, "shaders/testDraw/tris2D_colored.frag.spv"));
+    
     pipelineCI.inputAssemblyState.topology = mvk::PrimitiveTopology::TRIANGLE_LIST;
     pipelineCI.colorBlendState.blendConstants = mvk::colors::opaqueWhite();
     
     {
         auto attachment0Blend = mvk::PipelineColorBlendAttachmentState {};
         attachment0Blend.blendEnable = false;
-        attachment0Blend.srcColorBlendFactor = mvk::BlendFactor::ONE;
-        attachment0Blend.dstColorBlendFactor = mvk::BlendFactor::ZERO;
-        attachment0Blend.srcAlphaBlendFactor = mvk::BlendFactor::ONE;
-        attachment0Blend.dstAlphaBlendFactor = mvk::BlendFactor::ZERO;
-        attachment0Blend.colorBlendOp = mvk::BlendOp::ADD;
-        attachment0Blend.alphaBlendOp = mvk::BlendOp::ADD;
-        attachment0Blend.colorWriteMask = mvk::ColorComponentFlag::A | mvk::ColorComponentFlag::R | mvk::ColorComponentFlag::G | mvk::ColorComponentFlag::B;
+        attachment0Blend.colorWriteMask = static_cast<mvk::ColorComponentFlag> (~0u);
 
         pipelineCI.colorBlendState.attachments.push_back(attachment0Blend);
     }

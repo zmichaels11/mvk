@@ -16,16 +16,29 @@ namespace mvk {
 
         Semaphore * allocateSemaphore();
 
+        SemaphorePool(const SemaphorePool&) = delete;
+        SemaphorePool& operator= (const SemaphorePool&) = delete;
+
     public:
-        SemaphorePool(Device * device) :
+        SemaphorePool() noexcept:
+            _device(nullptr) {}
+
+        SemaphorePool(Device * device) noexcept:
             _device(device) {}
 
-        inline Device * getDevice() const {
+        SemaphorePool(SemaphorePool&& from) noexcept:
+            _device(std::move(from._device)),
+            _allSemaphores(std::move(from._allSemaphores)),
+            _availableSemaphores(std::move(from._availableSemaphores)) {}
+
+        SemaphorePool& operator= (SemaphorePool&& from) = default;
+
+        inline Device * getDevice() const noexcept {
             return _device;
         }
 
         Semaphore * acquireSemaphore();
 
-        void releaseSemaphore(Semaphore * semaphore);
+        void releaseSemaphore(Semaphore * semaphore) noexcept;
     };
 }

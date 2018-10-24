@@ -15,24 +15,32 @@ namespace mvk {
 
         auto computePipelineCI = VkComputePipelineCreateInfo {};
         computePipelineCI.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-        computePipelineCI.flags = createInfo.flags;
+        computePipelineCI.flags = static_cast<VkPipelineCreateFlags> (createInfo.flags);
         computePipelineCI.layout = _layout->getHandle();
         computePipelineCI.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         computePipelineCI.stage.stage = static_cast<VkShaderStageFlagBits> (createInfo.stage.stage);
         computePipelineCI.stage.pName = createInfo.stage.name.c_str();
         computePipelineCI.stage.module = pDevice->getShaderModule(createInfo.stage.moduleInfo)->getHandle();
-        computePipelineCI.stage.flags = createInfo.stage.flags;
+        computePipelineCI.stage.flags = static_cast<VkPipelineShaderStageCreateFlags> (createInfo.stage.flags);
 
-        _handle = VK_NULL_HANDLE;
         Util::vkAssert(vkCreateComputePipelines(pDevice->getHandle(), cache->getHandle(), 1, &computePipelineCI, nullptr, &_handle));
     }
 
-    ComputePipeline::~ComputePipeline() {
+    ComputePipeline::~ComputePipeline() noexcept {
         _layout->release();
         vkDestroyPipeline(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    PipelineBindPoint ComputePipeline::getBindPoint() const {
+    ComputePipeline& ComputePipeline::operator= (ComputePipeline&& from) noexcept {
+        std::swap(_cache, from._cache);
+        std::swap(_info, from._info);
+        std::swap(_layout, from._layout);
+        std::swap(_handle, from._handle);
+
+        return *this;
+    }
+
+    PipelineBindPoint ComputePipeline::getBindPoint() const noexcept {
         return PipelineBindPoint::COMPUTE;
     }
 
@@ -40,27 +48,27 @@ namespace mvk {
         
     }
 
-    Device * ComputePipeline::getDevice() const {
+    Device * ComputePipeline::getDevice() const noexcept {
         return _cache->getDevice();
     }
 
-    PipelineCache * ComputePipeline::getPipelineCache() const {
+    PipelineCache * ComputePipeline::getPipelineCache() const noexcept {
         return _cache;
     }
 
-    PipelineLayout * ComputePipeline::getPipelineLayout() const {
+    PipelineLayout * ComputePipeline::getPipelineLayout() const noexcept {
         return _layout;
     }
 
-    DescriptorSetLayout * ComputePipeline::getDescriptorSetLayout(int index) const {
+    DescriptorSetLayout * ComputePipeline::getDescriptorSetLayout(std::ptrdiff_t index) const noexcept {
         return _layout->getDescriptorSetLayout(index);
     }
 
-    std::vector<DescriptorSetLayout * > ComputePipeline::getDescriptorSetLayouts() const {
+    std::vector<DescriptorSetLayout * > ComputePipeline::getDescriptorSetLayouts() const noexcept {
         return _layout->getDescriptorSetLayouts();
     }
 
-    VkPipeline ComputePipeline::getHandle() const {
+    VkPipeline ComputePipeline::getHandle() const noexcept {
         return _handle;
     }
 }

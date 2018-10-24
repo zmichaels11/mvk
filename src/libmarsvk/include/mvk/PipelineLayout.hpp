@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstddef>
+
 #include "volk.h"
 
+#include <utility>
 #include <vector>
 
 #include "mvk/DescriptorSetLayout.hpp"
@@ -25,17 +28,37 @@ namespace mvk {
         PipelineLayoutCache * _cache;
         std::vector<DescriptorSetLayout * > _setLayouts;
 
+        PipelineLayout(const PipelineLayout&) = delete;
+
+        PipelineLayout& operator= (const PipelineLayout&) = delete;
+
     public:
+        PipelineLayout() noexcept:
+            _handle(VK_NULL_HANDLE),
+            _cache(nullptr) {}
+
         PipelineLayout(PipelineLayoutCache * cache, const CreateInfo& info);
 
-        ~PipelineLayout();
+        PipelineLayout(PipelineLayout&& from) noexcept:
+            _info(std::move(from._info)),
+            _handle(std::exchange(from._handle, nullptr)),
+            _cache(std::move(from._cache)),
+            _setLayouts(std::move(from._setLayouts)) {}
+
+        ~PipelineLayout() noexcept;
+
+        PipelineLayout& operator= (PipelineLayout&& from) noexcept;
 
         inline std::vector<DescriptorSetLayout * > getDescriptorSetLayouts() const noexcept {
             return _setLayouts;
         }
 
-        inline DescriptorSetLayout * getDescriptorSetLayout(int index) const noexcept {
+        inline DescriptorSetLayout * getDescriptorSetLayout(std::ptrdiff_t index) const noexcept {
             return _setLayouts[index];
+        }
+
+        inline std::size_t getDescriptorSetLayoutCount() const noexcept {
+            return _setLayouts.size();
         }
 
         inline PipelineLayoutCache * getPipelineLayoutCache() const noexcept {
@@ -50,12 +73,12 @@ namespace mvk {
             return _handle;
         }
 
-        Device * getDevice() const;
+        Device * getDevice() const noexcept;
 
         void release();
     };
 
-    inline bool operator== (const PipelineLayout::CreateInfo& lhs, const PipelineLayout::CreateInfo& rhs) {
+    inline constexpr bool operator== (const PipelineLayout::CreateInfo& lhs, const PipelineLayout::CreateInfo& rhs) noexcept {
         return lhs.flags == rhs.flags
                 && lhs.pushConstantRanges == rhs.pushConstantRanges
                 && lhs.setLayoutInfos == rhs.setLayoutInfos;

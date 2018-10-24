@@ -19,15 +19,15 @@ namespace mvk {
         std::set<std::string> _enabledExtensions;
     }
 
-    void Instance::enableExtension(const std::string& extName) {
+    void Instance::enableExtension(const std::string& extName) noexcept {
         _enabledExtensions.insert(extName);
     }
 
-    void Instance::enableLayer(const std::string& layerName) {
+    void Instance::enableLayer(const std::string& layerName) noexcept {
         _enabledLayers.insert(layerName);
     }
 
-    void Instance::enableRequiredGLFWExtensions() {
+    void Instance::enableRequiredGLFWExtensions() noexcept {
         uint32_t requiredGLFWExtensions = 0;
         auto extensions = glfwGetRequiredInstanceExtensions(&requiredGLFWExtensions);
 
@@ -78,44 +78,41 @@ namespace mvk {
         
         volkLoadInstance(_handle);
 
-        Util::vkAssert(vkEnumeratePhysicalDevices(_handle, &_physicalDeviceCount, nullptr));
+        std::uint32_t physicalDeviceCount = 0;
+        Util::vkAssert(vkEnumeratePhysicalDevices(_handle, &physicalDeviceCount, nullptr));
 
-        auto pPhysicalDevices = std::make_unique<VkPhysicalDevice[]> (_physicalDeviceCount);
+        auto pPhysicalDevices = std::make_unique<VkPhysicalDevice[]> (physicalDeviceCount);
 
-        Util::vkAssert(vkEnumeratePhysicalDevices(_handle, &_physicalDeviceCount, pPhysicalDevices.get()));
+        Util::vkAssert(vkEnumeratePhysicalDevices(_handle, &physicalDeviceCount, pPhysicalDevices.get()));
 
-        _physicalDevices = std::make_unique<PhysicalDevice[]> (_physicalDeviceCount);
+        _physicalDevices.reserve(physicalDeviceCount);
 
-        for (std::uint32_t i = 0; i < _physicalDeviceCount; i++) {
-            auto pd = PhysicalDevice(pPhysicalDevices[i]);
-            
-            std::swap(_physicalDevices[i], pd);
+        for (std::uint32_t i = 0; i < physicalDeviceCount; i++) {
+            _physicalDevices.push_back(PhysicalDevice(pPhysicalDevices[i]));
         }
     }
 
-    Instance::~Instance() {
-        vkDestroyInstance(_handle, nullptr);
+    Instance::~Instance() noexcept {
+        free();
     }
 
-    void Instance::free() {
-        vkDestroyInstance(_handle, nullptr);
+    Instance& Instance::operator= (Instance&& from) noexcept {
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_physicalDevices, from._physicalDevices);
+
+        return *this;
+    }
+
+    void Instance::free() noexcept {
+        if (_handle) {
+            vkDestroyInstance(_handle, nullptr);
+            _handle = VK_NULL_HANDLE;
+        }
     }
 
     Instance& Instance::getCurrent() {
         static Instance THE_INSTANCE;
 
         return THE_INSTANCE;
-    }
-
-    std::vector<PhysicalDevice * > Instance::getPhysicalDevices() const {
-        auto out = std::vector<PhysicalDevice * >();
-
-        out.reserve(_physicalDeviceCount);
-
-        for (std::uint32_t i = 0; i < _physicalDeviceCount; i++) {
-            out.push_back(_physicalDevices.get() + i);
-        }
-
-        return out;
     }
 }

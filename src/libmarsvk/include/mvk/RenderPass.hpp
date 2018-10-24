@@ -2,6 +2,8 @@
 
 #include "volk.h"
 
+#include <memory>
+#include <utility>
 #include <vector>
 
 #include "mvk/AttachmentDescription.hpp"
@@ -12,6 +14,10 @@
 namespace mvk {
     class Device;
 
+    class RenderPass;
+
+    using UPtrRenderPass = std::unique_ptr<RenderPass>;
+
     class RenderPass {
     public:
         struct CreateInfo {
@@ -21,27 +27,33 @@ namespace mvk {
             std::vector<SubpassDependency> dependencies;
         };
 
+        static inline UPtrRenderPass unique_null() noexcept {
+            return std::unique_ptr<RenderPass>();
+        }
+
     private:
         VkRenderPass _handle;
         CreateInfo _info;
         Device * _device;
 
+        RenderPass(const RenderPass&) = delete;
+        RenderPass& operator= (const RenderPass&) = delete;
+
     public:
-        RenderPass() :
+        RenderPass() noexcept:
             _handle(VK_NULL_HANDLE),
             _device(nullptr) {}
 
         RenderPass(Device * device, const CreateInfo& createInfo);
 
-        RenderPass(const RenderPass&) = delete;
+        RenderPass(RenderPass&& from) noexcept:
+            _handle(std::exchange(from._handle, nullptr)),
+            _info(std::move(from._info)),
+            _device(std::move(from._device)) {}
 
-        RenderPass(RenderPass&&) = default;
+        ~RenderPass() noexcept;
 
-        ~RenderPass();
-
-        RenderPass& operator= (const RenderPass&) = delete;
-
-        RenderPass& operator= (RenderPass&&) = default;
+        RenderPass& operator= (RenderPass&& from) noexcept;
 
         inline Device * getDevice() const noexcept {
             return _device;

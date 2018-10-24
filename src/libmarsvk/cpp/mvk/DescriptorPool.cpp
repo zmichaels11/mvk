@@ -8,7 +8,7 @@
 #include "mvk/Util.hpp"
 
 namespace mvk {
-    DescriptorPool::~DescriptorPool() {
+    DescriptorPool::~DescriptorPool() noexcept {
         auto pDevice = getDevice();
 
         for (const auto& set : _allocatedDescriptorSets) {
@@ -23,11 +23,20 @@ namespace mvk {
         }
     }
 
+    DescriptorPool& DescriptorPool::operator= (DescriptorPool&& from) noexcept {
+        std::swap(this->_allocatedDescriptorSets, from._allocatedDescriptorSets);
+        std::swap(this->_descriptorSetLayout, from._descriptorSetLayout);
+        std::swap(this->_info, from._info);
+        std::swap(this->_pools, from._pools);
+
+        return *this;
+    }
+
     void DescriptorPool::releaseDescriptorSet(DescriptorSet * pSet) {
         auto& pool = _pools[pSet->getPoolIndex()];
         auto setHandle = pSet->getHandle();
 
-        vkFreeDescriptorSets(getDevice()->getHandle(), pool->_handle, 1, &setHandle);
+        Util::vkAssert(vkFreeDescriptorSets(getDevice()->getHandle(), pool->_handle, 1, &setHandle));
 
         pool->_allocatedSets -= 1;
 
@@ -100,7 +109,7 @@ namespace mvk {
         return out;
     }
 
-    Device * DescriptorPool::getDevice() const {
+    Device * DescriptorPool::getDevice() const noexcept {
         return _descriptorSetLayout->getDevice();
     }
 }

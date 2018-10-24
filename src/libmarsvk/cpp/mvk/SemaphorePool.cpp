@@ -9,8 +9,21 @@
 
 namespace mvk {
     Semaphore * SemaphorePool::allocateSemaphore() {
-        VkSemaphoreCreateInfo semaphoreCI {};
+        auto semaphoreCI = VkSemaphoreCreateInfo {};
         semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        
+        auto exportSemaphoreCI = VkExportSemaphoreCreateInfo {};
+        exportSemaphoreCI.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
+
+        {
+            const auto& enabledExtensions = _device->getEnabledExtensions();
+            
+            if (enabledExtensions.end() != enabledExtensions.find("VK_KHR_external_semaphore_fd")) {                
+                exportSemaphoreCI.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+
+                semaphoreCI.pNext = &exportSemaphoreCI;
+            }
+        }
 
         VkSemaphore handle = VK_NULL_HANDLE;
 
@@ -36,7 +49,7 @@ namespace mvk {
         }
     }
 
-    void SemaphorePool::releaseSemaphore(Semaphore * semaphore) {
+    void SemaphorePool::releaseSemaphore(Semaphore * semaphore) noexcept {
         _availableSemaphores.push(semaphore);
     }
 }

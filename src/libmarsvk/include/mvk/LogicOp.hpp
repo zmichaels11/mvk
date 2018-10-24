@@ -3,6 +3,7 @@
 #include "volk.h"
 
 namespace mvk {
+    //! Logic operations used in color logic ops.
     enum class LogicOp : unsigned int {
         CLEAR = VK_LOGIC_OP_CLEAR,
         AND = VK_LOGIC_OP_AND,

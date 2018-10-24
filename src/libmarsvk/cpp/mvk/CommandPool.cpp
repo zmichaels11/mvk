@@ -18,25 +18,27 @@ namespace mvk {
         commandPoolCI.flags = static_cast<VkCommandPoolCreateFlags> (flags);
         commandPoolCI.queueFamilyIndex = static_cast<uint32_t> (queueFamily->getIndex());
 
-        _handle = VK_NULL_HANDLE;
-
         Util::vkAssert(vkCreateCommandPool(pDevice->getHandle(), &commandPoolCI, nullptr, &_handle));
     }
 
-    CommandPool::~CommandPool() {
+    CommandPool::~CommandPool() noexcept {
         vkDestroyCommandPool(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    Device * CommandPool::getDevice() const {
-        if (_queueFamily == nullptr) {
-            throw std::runtime_error("CommandPool is not valid!");
-        }
+    CommandPool& CommandPool::operator= (CommandPool&& from) noexcept {
+        std::swap(_flags, from._flags);
+        std::swap(_queueFamily, from._queueFamily);
+        std::swap(_handle, from._handle);
 
+        return *this;
+    }
+
+    Device * CommandPool::getDevice() const noexcept {
         return _queueFamily->getDevice();
     }
 
     void CommandPool::reset(unsigned int flags) {
-        vkResetCommandPool(getDevice()->getHandle(), _handle, flags);
+        Util::vkAssert(vkResetCommandPool(getDevice()->getHandle(), _handle, flags));
     }
 
     std::unique_ptr<CommandBuffer> CommandPool::allocate(CommandBufferLevel level) {

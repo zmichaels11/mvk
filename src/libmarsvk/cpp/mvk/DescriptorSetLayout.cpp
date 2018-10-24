@@ -17,15 +17,15 @@ namespace mvk {
 
         auto pDevice = cache->getDevice();
 
-        VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI {};
+        auto descriptorSetLayoutCI = VkDescriptorSetLayoutCreateInfo {};
         descriptorSetLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        descriptorSetLayoutCI.flags = _info.flags;
+        descriptorSetLayoutCI.flags = static_cast<VkDescriptorSetLayoutCreateFlags> (_info.flags);
 
         auto pBindings = std::vector<VkDescriptorSetLayoutBinding>();
         pBindings.reserve(_info.bindings.size());
 
         for (const auto& binding : _info.bindings) {
-            VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
+            auto descriptorSetLayoutBinding = VkDescriptorSetLayoutBinding {};
             descriptorSetLayoutBinding.binding = static_cast<uint32_t> (binding.binding);
             descriptorSetLayoutBinding.descriptorCount = static_cast<uint32_t> (binding.descriptorCount);
             descriptorSetLayoutBinding.descriptorType = static_cast<VkDescriptorType> (binding.descriptorType);
@@ -55,7 +55,7 @@ namespace mvk {
         for (const auto& sizeByType : poolSizesByType) {
             VkDescriptorPoolSize poolSize {};
             poolSize.type = static_cast<VkDescriptorType> (sizeByType.first);
-            poolSize.descriptorCount = sizeByType.second * MAX_SETS;
+            poolSize.descriptorCount = static_cast<std::uint32_t> (sizeByType.second * MAX_SETS);
 
             poolCI.poolSizes.push_back(poolSize);
         }
@@ -63,16 +63,25 @@ namespace mvk {
         _pool = std::make_unique<DescriptorPool> (poolCI, this);
     }
 
-    DescriptorSetLayout::~DescriptorSetLayout() {
+    DescriptorSetLayout::~DescriptorSetLayout() noexcept {
         _pool.reset();
         vkDestroyDescriptorSetLayout(getDevice()->getHandle(), _handle, nullptr);
+    }
+
+    DescriptorSetLayout& DescriptorSetLayout::operator= (DescriptorSetLayout&& from) noexcept {
+        std::swap(this->_cache, from._cache);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_info, from._info);
+        std::swap(this->_pool, from._pool);
+
+        return *this;
     }
 
     void DescriptorSetLayout::release() {
         _cache->releaseDescriptorSetLayout(this);
     }
 
-    Device * DescriptorSetLayout::getDevice() const {
+    Device * DescriptorSetLayout::getDevice() const noexcept {
         return _cache->getDevice();
     }
 }

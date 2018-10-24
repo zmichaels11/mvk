@@ -18,7 +18,7 @@ namespace mvk {
         }
     }
 
-    void FencePool::releaseFence(Fence * fence) {
+    void FencePool::releaseFence(Fence * fence) noexcept {
         _availableFences.push(fence);
     }
 

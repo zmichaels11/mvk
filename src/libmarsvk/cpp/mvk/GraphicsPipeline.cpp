@@ -187,12 +187,21 @@ namespace mvk {
         Util::vkAssert(vkCreateGraphicsPipelines(pDevice->getHandle(), cache->getHandle(), 1, &graphicsPipelineCI, nullptr, &_handle));
     }
 
-    GraphicsPipeline::~GraphicsPipeline() {
+    GraphicsPipeline::~GraphicsPipeline() noexcept {
         _layout->release();
         vkDestroyPipeline(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    PipelineBindPoint GraphicsPipeline::getBindPoint() const {
+    GraphicsPipeline& GraphicsPipeline::operator= (GraphicsPipeline&& from) noexcept {
+        std::swap(this->_cache, from._cache);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_info, from._info);
+        std::swap(this->_layout, from._layout);
+
+        return *this;
+    }
+
+    PipelineBindPoint GraphicsPipeline::getBindPoint() const noexcept {
         return PipelineBindPoint::GRAPHICS;
     }
 
@@ -200,27 +209,27 @@ namespace mvk {
 
     }
 
-    Device * GraphicsPipeline::getDevice() const {
+    Device * GraphicsPipeline::getDevice() const noexcept {
         return _cache->getDevice();
     }
 
-    PipelineCache * GraphicsPipeline::getPipelineCache() const {
+    PipelineCache * GraphicsPipeline::getPipelineCache() const noexcept {
         return _cache;
     }
 
-    PipelineLayout * GraphicsPipeline::getPipelineLayout() const {
+    PipelineLayout * GraphicsPipeline::getPipelineLayout() const noexcept {
         return _layout;
     }
 
-    DescriptorSetLayout * GraphicsPipeline::getDescriptorSetLayout(int index) const {
+    DescriptorSetLayout * GraphicsPipeline::getDescriptorSetLayout(std::ptrdiff_t index) const noexcept {
         return _layout->getDescriptorSetLayout(index);
     }
 
-    std::vector<DescriptorSetLayout * > GraphicsPipeline::getDescriptorSetLayouts() const {
+    std::vector<DescriptorSetLayout * > GraphicsPipeline::getDescriptorSetLayouts() const noexcept {
         return _layout->getDescriptorSetLayouts();
     }
 
-    VkPipeline GraphicsPipeline::getHandle() const {
+    VkPipeline GraphicsPipeline::getHandle() const noexcept {
         return _handle;
     }
 }

@@ -3,6 +3,7 @@
 #include "volk.h"
 
 #include <string>
+#include <utility>
 
 namespace mvk {
     class Device;
@@ -18,37 +19,40 @@ namespace mvk {
         VkShaderModule _handle;
         CreateInfo _info;
         Device * _device;
+
+        ShaderModule(const ShaderModule&) = delete;
+        ShaderModule& operator=(const ShaderModule&) = delete;
     
     public:
-        ShaderModule() :
-            _handle(VK_NULL_HANDLE) {}
+        ShaderModule() noexcept :
+            _handle(VK_NULL_HANDLE),
+            _device(nullptr) {}
 
         ShaderModule(Device * device, const CreateInfo& info);
 
-        ShaderModule(const ShaderModule&) = delete;
+        ShaderModule(ShaderModule&& from) noexcept: 
+            _handle(std::exchange(from._handle, nullptr)),
+            _info(std::move(from._info)),
+            _device(std::move(from._device)) {}
 
-        ShaderModule(ShaderModule&&) = default;
-
-        ~ShaderModule();
-
-        ShaderModule& operator=(const ShaderModule&) = delete;
+        ~ShaderModule() noexcept;
         
-        ShaderModule& operator=(ShaderModule&&) = default;
+        ShaderModule& operator=(ShaderModule&& from) noexcept;
 
-        inline VkShaderModule getHandle() const {
+        inline VkShaderModule getHandle() const noexcept {
             return _handle;
         }
 
-        inline const CreateInfo& getInfo() const {
+        inline const CreateInfo& getInfo() const noexcept {
             return _info;
         }
 
-        inline Device * getDevice() const {
+        inline Device * getDevice() const noexcept {
             return _device;
         }
     };
 
-    inline bool operator==(const ShaderModule::CreateInfo& lhs, const ShaderModule::CreateInfo& rhs) {
+    inline bool operator==(const ShaderModule::CreateInfo& lhs, const ShaderModule::CreateInfo& rhs) noexcept {
         return lhs.flags == rhs.flags && lhs.path == rhs.path;
     }
 }

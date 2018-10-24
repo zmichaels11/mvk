@@ -2,6 +2,9 @@
 
 #include "volk.h"
 
+#include <memory>
+#include <utility>
+
 namespace mvk {
     class Device;
     class SemaphorePool;
@@ -10,31 +13,40 @@ namespace mvk {
         VkSemaphore _handle;
         SemaphorePool * _pool;
 
+        Semaphore(const Semaphore&) = delete;
+        Semaphore& operator= (const Semaphore&) = delete;
+
     public:
-        Semaphore(SemaphorePool * pool, VkSemaphore handle) :
+        std::shared_ptr<void> userPtr;
+        
+        Semaphore() noexcept:
+            _handle(VK_NULL_HANDLE),
+            _pool(nullptr) {}
+
+        Semaphore(SemaphorePool * pool, VkSemaphore handle) noexcept:
             _handle(handle),
             _pool(pool) {}
 
-        Semaphore(const Semaphore&) = delete;
+        Semaphore(Semaphore&& from) noexcept:
+            _handle(std::exchange(from._handle, nullptr)),
+            _pool(std::move(from._pool)) {}
 
-        Semaphore(Semaphore&&) = default;
+        ~Semaphore() noexcept;
 
-        ~Semaphore();
+        Semaphore& operator= (Semaphore&& from) noexcept;
 
-        Semaphore& operator= (const Semaphore&) = delete;
+        void release() noexcept;
 
-        Semaphore& operator= (Semaphore&&) = default;
-
-        void release();
-
-        inline SemaphorePool * getSemaphorePool() const {
+        inline SemaphorePool * getSemaphorePool() const noexcept {
             return _pool;
         }
 
-        inline VkSemaphore getHandle() const {
+        inline VkSemaphore getHandle() const noexcept {
             return _handle;
         }
 
-        Device * getDevice() const;
+        Device * getDevice() const noexcept;
+
+        int getFd() const;
     };
 }

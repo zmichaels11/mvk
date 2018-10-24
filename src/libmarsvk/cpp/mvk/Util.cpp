@@ -11,33 +11,6 @@ namespace mvk {
             }
         }
 
-        std::string name(const InstanceLayer& layer) {
-            switch (layer) {
-                case InstanceLayer::API_DUMP:
-                    return "VK_LAYER_LUNARG_api_dump";
-                case InstanceLayer::ASSISTANT_LAYER:
-                    return "VK_LAYER_LUNARG_assistant_layer";
-                case InstanceLayer::CORE_VALIDATION:
-                    return "VK_LAYER_LUNARG_core_validation";
-                case InstanceLayer::DEVICE_SIMULATION:
-                    return "VK_LAYER_LUNARG_device_simulation";
-                case InstanceLayer::MONITOR:
-                    return "VK_LAYER_LUNARG_monitor";
-                case InstanceLayer::OBJECT_TRACKER:
-                    return "VK_LAYER_LUNARG_object_tracker";
-                case InstanceLayer::PARAMETER_VALIDATION:
-                    return "VK_LAYER_LUNARG_parameter_validation";
-                case InstanceLayer::SCREENSHOT:
-                    return "VK_LAYER_LUNARG_screenshot";
-                case InstanceLayer::STANDARD_VALIDATION:
-                    return "VK_LAYER_LUNARG_standard_validation";
-                case InstanceLayer::VKTRACE:
-                    return "VK_LAYER_LUNARG_vktrace";
-                default:
-                    throw std::runtime_error("Unknown InstanceLayer!");
-            }
-        }
-
         std::string translateVulkanResult(VkResult result)  {
             switch (result) {
                 // Success codes

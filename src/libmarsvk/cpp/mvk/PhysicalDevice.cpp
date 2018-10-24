@@ -40,11 +40,11 @@ namespace mvk {
         _vendor = static_cast<Vendor> (_properties.vendorID);
     }
 
-    PhysicalDeviceType PhysicalDevice::getPhysicalDeviceType() const {
+    PhysicalDeviceType PhysicalDevice::getPhysicalDeviceType() const noexcept {
         return static_cast<PhysicalDeviceType> (_properties.deviceType);
     }
 
-    std::string PhysicalDevice::toString() const {
+    std::string PhysicalDevice::toString() const noexcept {
         auto out = std::stringstream();
         auto version = _properties.apiVersion;
         auto major = VK_VERSION_MAJOR(version);

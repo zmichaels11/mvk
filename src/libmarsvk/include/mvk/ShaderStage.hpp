@@ -12,11 +12,11 @@ namespace mvk {
         COMPUTE = VK_SHADER_STAGE_COMPUTE_BIT
     };
 
-    constexpr ShaderStage operator| (ShaderStage lhs, ShaderStage rhs) {
+    inline constexpr ShaderStage operator| (ShaderStage lhs, ShaderStage rhs) noexcept {
         return static_cast<ShaderStage> (static_cast<unsigned int> (lhs) | static_cast<unsigned int> (rhs));
     }
 
-    constexpr ShaderStage operator& (ShaderStage lhs, ShaderStage rhs) {
+    inline constexpr ShaderStage operator& (ShaderStage lhs, ShaderStage rhs) noexcept {
         return static_cast<ShaderStage> (static_cast<unsigned int> (lhs) & static_cast<unsigned int> (rhs));
     }
 }

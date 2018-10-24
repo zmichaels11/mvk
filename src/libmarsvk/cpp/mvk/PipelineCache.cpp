@@ -25,7 +25,7 @@ namespace mvk {
         }
     }
 
-    PipelineCache::~PipelineCache() {
+    PipelineCache::~PipelineCache() noexcept {
         if (VK_NULL_HANDLE == _handle) {
             return;
         }
@@ -35,5 +35,10 @@ namespace mvk {
         vkDestroyPipelineCache(_device->getHandle(), _handle, nullptr);
     }
 
-    
+    PipelineCache& PipelineCache::operator= (PipelineCache&& from) noexcept {
+        std::swap(this->_device, from._device);
+        std::swap(this->_handle, from._handle);
+
+        return *this;
+    }
 }

@@ -3,6 +3,11 @@
 #include "volk.h"
 
 namespace mvk {
+    //! Framebuffer blending factors.
+    /*!
+        The source and destination color and alpha blending factors.
+        See: <a href="https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkBlendFactor.html">VkBlendFactor</a>
+    */
     enum class BlendFactor : unsigned int {
         ZERO = VK_BLEND_FACTOR_ZERO,
         ONE = VK_BLEND_FACTOR_ONE,

@@ -22,11 +22,11 @@ namespace mvk {
         BOTTOM_OF_PIPE = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
     };
 
-    constexpr PipelineStageFlag operator| (PipelineStageFlag lhs, PipelineStageFlag rhs) {
+    inline constexpr PipelineStageFlag operator| (PipelineStageFlag lhs, PipelineStageFlag rhs) noexcept {
         return static_cast<PipelineStageFlag> (static_cast<unsigned int> (lhs) | static_cast<unsigned int> (rhs));
     }
     
-    constexpr PipelineStageFlag operator& (PipelineStageFlag lhs, PipelineStageFlag rhs) {
+    inline constexpr PipelineStageFlag operator& (PipelineStageFlag lhs, PipelineStageFlag rhs) noexcept {
         return static_cast<PipelineStageFlag> (static_cast<unsigned int> (lhs) & static_cast<unsigned int> (rhs));
     }
 }

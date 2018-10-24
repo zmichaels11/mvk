@@ -11,17 +11,17 @@ namespace mvk {
         _buffer = buffer;
         _info = info;
 
-        VkBufferViewCreateInfo bufferViewCI {};
+        auto bufferViewCI = VkBufferViewCreateInfo {};
         bufferViewCI.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
-        bufferViewCI.flags = info.flags;
-        bufferViewCI.offset = info.offset;
-        bufferViewCI.range = info.range;
+        bufferViewCI.flags = static_cast<VkBufferViewCreateFlags> (info.flags);
+        bufferViewCI.offset = static_cast<VkDeviceSize> (info.offset);
+        bufferViewCI.range = static_cast<VkDeviceSize> (info.range);
         bufferViewCI.format = static_cast<VkFormat> (info.format);
 
         Util::vkAssert(vkCreateBufferView(buffer->getDevice()->getHandle(), &bufferViewCI, nullptr, &_handle));
     }
 
-    BufferView::~BufferView() {
+    BufferView::~BufferView() noexcept {
         if (VK_NULL_HANDLE == _handle) {
             return;
         }
@@ -29,7 +29,15 @@ namespace mvk {
         vkDestroyBufferView(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    Device * BufferView::getDevice() const {
+    BufferView& BufferView::operator= (BufferView&& from) noexcept {
+        std::swap(_buffer, from._buffer);
+        std::swap(_info, from._info);
+        std::swap(_handle, from._handle);
+
+        return *this;
+    }
+
+    Device * BufferView::getDevice() const noexcept {
         return _buffer->getDevice();
     }
 }

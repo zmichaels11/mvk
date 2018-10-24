@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "volk.h"
 
 #include <vector>
@@ -14,20 +16,20 @@ namespace mvk {
 
     class Pipeline {
     public:
-        virtual PipelineBindPoint getBindPoint() const = 0;
+        virtual PipelineBindPoint getBindPoint() const noexcept = 0;
 
         virtual void release() = 0;
 
-        virtual Device * getDevice() const = 0;
+        virtual Device * getDevice() const noexcept = 0;
 
-        virtual PipelineCache * getPipelineCache() const = 0;
+        virtual PipelineCache * getPipelineCache() const noexcept = 0;
 
-        virtual PipelineLayout * getPipelineLayout() const = 0;
+        virtual PipelineLayout * getPipelineLayout() const noexcept = 0;
 
-        virtual DescriptorSetLayout * getDescriptorSetLayout(int index) const = 0;
+        virtual DescriptorSetLayout * getDescriptorSetLayout(std::ptrdiff_t index) const noexcept = 0;
 
-        virtual std::vector<DescriptorSetLayout * > getDescriptorSetLayouts() const = 0;
+        virtual std::vector<DescriptorSetLayout * > getDescriptorSetLayouts() const noexcept = 0;
 
-        virtual VkPipeline getHandle() const = 0;
+        virtual VkPipeline getHandle() const noexcept = 0;
     };
 }

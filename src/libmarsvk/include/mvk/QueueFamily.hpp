@@ -1,11 +1,12 @@
 #pragma once
 
-#include <cstdint>
+#include <cstddef>
 
 #include "volk.h"
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "mvk/CommandPool.hpp"
@@ -14,6 +15,7 @@
 
 namespace mvk {
     class Device;
+    class Surface;
 
     class QueueFamily {
         int _index;
@@ -23,46 +25,57 @@ namespace mvk {
 
         //TODO: this should be thread_local
         std::unique_ptr<CommandPool> _commandPool;
+
+        QueueFamily(const QueueFamily&) = delete;
+        QueueFamily& operator= (const QueueFamily&) = delete;
     
     public:
-        QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties);
+        QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties) noexcept;
 
-        QueueFamily() :
+        QueueFamily() noexcept:
             _index(-1),
             _device(nullptr) {}
 
-        QueueFamily(const QueueFamily&) = delete;
+        QueueFamily(QueueFamily&& from) noexcept:
+            _index(std::move(from._index)),
+            _device(std::move(from._device)),
+            _properties(std::move(from._properties)),
+            _queues(std::move(from._queues)) {}
 
-        QueueFamily(QueueFamily&&) = default;
-
-        ~QueueFamily();
-
-        QueueFamily& operator= (const QueueFamily&) = delete;
+        ~QueueFamily() noexcept;
 
         QueueFamily& operator= (QueueFamily&&) = default;
 
-        QueueFlag getFlags() const;
+        QueueFlag getFlags() const noexcept;
 
         CommandPool * getCurrentCommandPool();
 
-        bool canPresent(VkSurfaceKHR surface) const;
+        bool canPresent(const Surface * surface) const;
 
-        inline Device * getDevice() const {
+        inline bool canPresent(const std::unique_ptr<Surface>& surface) const {
+            return canPresent(surface.get());
+        }
+
+        inline Device * getDevice() const noexcept {
             return _device;
         }
 
-        inline int getIndex() const {
+        inline int getIndex() const noexcept {
             return _index;
         }
 
-        inline const VkQueueFamilyProperties& getProperties() const {
+        inline const VkQueueFamilyProperties& getProperties() const noexcept {
             return _properties;
         }
 
-        inline Queue * getQueue(int queueIndex) const noexcept {
+        inline Queue * getQueue(std::ptrdiff_t queueIndex) const noexcept {
             return _queues[queueIndex].get();
         }
 
-        void detach();
+        inline std::size_t getQueeuCount() const noexcept {
+            return _queues.size();
+        }
+
+        void detach() noexcept;
     };
 }
