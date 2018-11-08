@@ -6,7 +6,7 @@
 #include <mvk/Util.hpp>
 
 namespace mvk {
-    Device * Sampler::getDevice() const {
+    Device * Sampler::getDevice() const noexcept {
         return _cache->getDevice();
     }
 
@@ -24,7 +24,7 @@ namespace mvk {
         samplerCI.addressModeW = static_cast<VkSamplerAddressMode> (createInfo.addressModeW);
         samplerCI.mipLodBias = createInfo.mipLodBias;
         samplerCI.anisotropyEnable = createInfo.anisotropyEnable ? VK_TRUE : VK_FALSE;
-        samplerCI.maxAnisotropy = createInfo.maxAnisotropy;
+        samplerCI.maxAnisotropy = static_cast<VkBool32> (createInfo.maxAnisotropy);
         samplerCI.minLod = createInfo.minLod;
         samplerCI.maxLod = createInfo.maxLod;
         samplerCI.borderColor = static_cast<VkBorderColor> (createInfo.borderColor);
@@ -33,8 +33,16 @@ namespace mvk {
         Util::vkAssert(vkCreateSampler(cache->getDevice()->getHandle(), &samplerCI, nullptr, &_handle));
     }
 
-    Sampler::~Sampler() {
+    Sampler::~Sampler() noexcept {
         vkDestroySampler(getDevice()->getHandle(), _handle, nullptr);
+    }
+
+    Sampler& Sampler::operator= (Sampler&& from) noexcept {
+        std::swap(this->_cache, from._cache);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_info, from._info);
+
+        return *this;
     }
 
     void Sampler::release() {

@@ -34,7 +34,7 @@ namespace mvk {
 
         auto pipelineLayoutCI = VkPipelineLayoutCreateInfo {};
         pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCI.flags = createInfo.flags;
+        pipelineLayoutCI.flags = static_cast<VkPipelineLayoutCreateFlags> (createInfo.flags);
         pipelineLayoutCI.pSetLayouts = pSetLayouts.data();
         pipelineLayoutCI.setLayoutCount = pSetLayouts.size();
         pipelineLayoutCI.pPushConstantRanges = pushConstantRanges.data();
@@ -45,7 +45,7 @@ namespace mvk {
         Util::vkAssert(vkCreatePipelineLayout(pDevice->getHandle(), &pipelineLayoutCI, nullptr, &_handle));
     }
 
-    PipelineLayout::~PipelineLayout() {
+    PipelineLayout::~PipelineLayout() noexcept {
         vkDestroyPipelineLayout(getDevice()->getHandle(), _handle, nullptr);
 
         for (auto& setLayout : _setLayouts) {
@@ -53,7 +53,16 @@ namespace mvk {
         }
     }
 
-    Device * PipelineLayout::getDevice() const {
+    PipelineLayout& PipelineLayout::operator= (PipelineLayout&& from) noexcept {
+        std::swap(this->_cache, from._cache);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_info, from._info);
+        std::swap(this->_setLayouts, from._setLayouts);
+
+        return *this;
+    }
+
+    Device * PipelineLayout::getDevice() const noexcept {
         return _cache->getDevice();
     }
 

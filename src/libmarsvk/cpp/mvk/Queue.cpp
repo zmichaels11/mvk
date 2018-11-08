@@ -1,7 +1,6 @@
 #include "mvk/Queue.hpp"
 
-#include <array>
-#include <iostream>
+#include <vector>
 
 #include "mvk/CommandBuffer.hpp"
 #include "mvk/Device.hpp"
@@ -23,7 +22,7 @@ namespace mvk {
         vkGetDeviceQueue(pDevice->getHandle(), queueFamily->getIndex(), queueIndex, &_handle);
     }
 
-    Device * Queue::getDevice() const {
+    Device * Queue::getDevice() const noexcept {
         return _queueFamily->getDevice();
     }
 
@@ -116,31 +115,39 @@ namespace mvk {
     }
 
     void Queue::present(const Queue::PresentInfo& info, const Swapchain::Backbuffer& backBuffer) {
-        QueueFamily * dstQueueFamily = nullptr;
+        auto imageMemoryBarriers = std::vector<ImageMemoryBarrier> ();
+        
+        if (ImageLayout::TRANSFER_SRC != info.imageLayout) {
+            QueueFamily * dstQueueFamily = nullptr;
 
-        if (info.srcQueueFamily) {
-            dstQueueFamily = _queueFamily;
+            if (info.srcQueueFamily || (info.srcQueueFamily && info.srcQueueFamily != _queueFamily)) {
+                dstQueueFamily = _queueFamily;
+            }
+
+            auto readImageBarrier = ImageMemoryBarrier {};
+            readImageBarrier.srcAccessMask = info.imageAccess;
+            readImageBarrier.dstAccessMask = AccessFlag::TRANSFER_READ;
+            readImageBarrier.oldLayout = info.imageLayout;
+            readImageBarrier.newLayout = ImageLayout::TRANSFER_SRC;
+            readImageBarrier.srcQueueFamily = info.srcQueueFamily;
+            readImageBarrier.dstQueueFamily = dstQueueFamily;
+            readImageBarrier.image = info.image;
+            readImageBarrier.subresourceRange = info.image->getSubresourceRange(0);
+
+            imageMemoryBarriers.push_back(readImageBarrier);
         }
 
-        auto imageMemoryBarriers = std::array<ImageMemoryBarrier, 2> ();
-        
-        imageMemoryBarriers[0].srcAccessMask = info.imageAccess;
-        imageMemoryBarriers[0].dstAccessMask = AccessFlag::TRANSFER_READ;
-        imageMemoryBarriers[0].oldLayout = info.imageLayout;
-        imageMemoryBarriers[0].newLayout = ImageLayout::TRANSFER_SRC;
-        imageMemoryBarriers[0].srcQueueFamily = info.srcQueueFamily;
-        imageMemoryBarriers[0].dstQueueFamily = dstQueueFamily;
-        imageMemoryBarriers[0].image = info.image;
-        imageMemoryBarriers[0].subresourceRange = info.image->getSubresourceRange(0);
+        {
+            auto writeImageBarrier = ImageMemoryBarrier {};
+            writeImageBarrier.srcAccessMask = AccessFlag::NONE;
+            writeImageBarrier.dstAccessMask = AccessFlag::TRANSFER_WRITE;
+            writeImageBarrier.oldLayout = ImageLayout::UNDEFINED;
+            writeImageBarrier.newLayout = ImageLayout::TRANSFER_DST;
+            writeImageBarrier.image = backBuffer.image;
+            writeImageBarrier.subresourceRange = backBuffer.image->getSubresourceRange(0);
 
-        imageMemoryBarriers[1].srcAccessMask = AccessFlag::MEMORY_READ;
-        imageMemoryBarriers[1].dstAccessMask = AccessFlag::TRANSFER_WRITE;
-        imageMemoryBarriers[1].oldLayout = ImageLayout::UNDEFINED;
-        imageMemoryBarriers[1].newLayout = ImageLayout::TRANSFER_DST;
-        imageMemoryBarriers[1].srcQueueFamily = nullptr;
-        imageMemoryBarriers[1].dstQueueFamily = nullptr;
-        imageMemoryBarriers[1].image = backBuffer.image;
-        imageMemoryBarriers[1].subresourceRange = backBuffer.image->getSubresourceRange(0);
+            imageMemoryBarriers.push_back(writeImageBarrier);
+        }
 
         auto cmd = acquireCommandBuffer();
         cmd.imageAcquireSemaphore = backBuffer.acquireSemaphore;
@@ -180,7 +187,7 @@ namespace mvk {
         {
             auto copyWaitInfo = SubmitWaitInfo {};
             copyWaitInfo.semaphore = cmd.imageAcquireSemaphore;
-            copyWaitInfo.stageFlags = info.srcStageMask;
+            copyWaitInfo.stageFlags = mvk::PipelineStageFlag::BOTTOM_OF_PIPE;
 
             waitInfos.push_back(copyWaitInfo);
         }

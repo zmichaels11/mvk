@@ -25,7 +25,7 @@ namespace mvk {
 
         for (const auto& attachment : createInfo.attachments) {
             auto vkAttachment = VkAttachmentDescription {};
-            vkAttachment.flags = attachment.flags;
+            vkAttachment.flags = static_cast<VkAttachmentDescriptionFlags> (attachment.flags);
             vkAttachment.format = static_cast<VkFormat> (attachment.format);
             vkAttachment.samples = static_cast<VkSampleCountFlagBits> (attachment.samples);
             vkAttachment.loadOp = static_cast<VkAttachmentLoadOp> (attachment.loadOp);
@@ -41,7 +41,7 @@ namespace mvk {
         auto deserialize = [](std::vector<VkAttachmentReference>& dst, const std::vector<AttachmentReference>& src) {
             for (const auto& reference : src) {
                 auto vkref = VkAttachmentReference {};
-                vkref.attachment = reference.attachment;
+                vkref.attachment = static_cast<std::uint32_t> (reference.attachment);
                 vkref.layout = static_cast<VkImageLayout> (reference.layout);
 
                 dst.push_back(vkref);
@@ -71,7 +71,7 @@ namespace mvk {
             }
 
             auto description = VkSubpassDescription {};
-            description.flags = subpass.flags;
+            description.flags = static_cast<VkSubpassDescriptionFlags> (subpass.flags);
             description.pipelineBindPoint = static_cast<VkPipelineBindPoint> (subpass.pipelineBindPoint);
             description.inputAttachmentCount = descriptionInfo.inputAttachments.size();
             description.pInputAttachments = descriptionInfo.inputAttachments.data();
@@ -109,7 +109,7 @@ namespace mvk {
 
         auto renderPassCI = VkRenderPassCreateInfo {};
         renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCI.flags = createInfo.flags;
+        renderPassCI.flags = static_cast<VkRenderPassCreateFlags> (createInfo.flags);
         renderPassCI.pAttachments = attachments.data();
         renderPassCI.attachmentCount = attachments.size();
         renderPassCI.subpassCount = subpasses.size();
@@ -122,7 +122,15 @@ namespace mvk {
         Util::vkAssert(vkCreateRenderPass(device->getHandle(), &renderPassCI, nullptr, &_handle));
     }
 
-    RenderPass::~RenderPass() {
+    RenderPass::~RenderPass() noexcept {
         vkDestroyRenderPass(getDevice()->getHandle(), _handle, nullptr);
+    }
+
+    RenderPass& RenderPass::operator= (RenderPass&& from) noexcept {
+        std::swap(this->_device, from._device);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_info, from._info);
+
+        return *this;
     }
 }

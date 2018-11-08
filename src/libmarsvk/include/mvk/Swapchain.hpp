@@ -2,9 +2,11 @@
 
 #include "volk.h"
 
+#include "mvk/PresentMode.hpp"
 #include "mvk/SurfaceFormat.hpp"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace mvk {
@@ -12,6 +14,10 @@ namespace mvk {
     class Image;
     class QueueFamily;
     class Semaphore;
+    class Surface;
+
+    class Swapchain;
+    using UPtrSwapchain = std::unique_ptr<Swapchain>;
 
     class Swapchain {
         struct Support {
@@ -19,16 +25,17 @@ namespace mvk {
             std::vector<VkSurfaceFormatKHR> surfaceFormats;
             std::vector<VkPresentModeKHR> presentModes;
 
-            Support() {}
+            Support() noexcept {}
 
-            Support(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+            Support(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) noexcept;
         };
 
     public:
         struct CreateInfo {
-            VkSurfaceKHR surface;
+            Surface * surface;
             QueueFamily * queueFamily;
             SurfaceFormat surfaceFormat;
+            PresentMode presentMode;
         };
 
         struct Backbuffer {
@@ -36,11 +43,15 @@ namespace mvk {
             Semaphore * acquireSemaphore;
             int index;
 
-            Backbuffer(Image * image, Semaphore * acquireSemaphore, int index) :
+            Backbuffer(Image * image, Semaphore * acquireSemaphore, int index) noexcept:
                 image(image),
                 acquireSemaphore(acquireSemaphore),
                 index(index) {}
-        };
+        };    
+
+        static inline UPtrSwapchain unique_null() noexcept {
+            return std::unique_ptr<Swapchain> ();
+        }
 
     private:
         CreateInfo _info;
@@ -52,14 +63,17 @@ namespace mvk {
         int _height;
         std::vector<std::unique_ptr<Image>> _images;
 
+        Swapchain(const Swapchain&) = delete;
+        Swapchain& operator= (const Swapchain&) = delete;
+
     public:
         void * userData;
 
-        Swapchain() :
+        Swapchain() noexcept:
             _device(nullptr),
             _handle(VK_NULL_HANDLE) {}
 
-        Swapchain(Device * device, const CreateInfo& createInfo) :
+        Swapchain(Device * device, const CreateInfo& createInfo) noexcept:
             _info(createInfo),
             _device(device),
             _handle(VK_NULL_HANDLE),
@@ -69,15 +83,19 @@ namespace mvk {
             _height(0),
             _images() {}
 
-        Swapchain(const Swapchain&) = delete;
+        Swapchain(Swapchain&& from) noexcept:
+            _info(std::move(from._info)),
+            _device(std::move(from._device)),
+            _handle(std::exchange(from._handle, nullptr)),
+            _presentMode(std::move(from._presentMode)),
+            _support(std::move(from._support)),
+            _width(std::move(from._width)),
+            _height(std::move(from._height)),
+            _images(std::move(from._images)) {}
 
-        Swapchain(Swapchain&&) = default;
+        ~Swapchain() noexcept;
 
-        ~Swapchain();
-
-        Swapchain& operator= (const Swapchain&) = delete;
-
-        Swapchain& operator= (Swapchain&&) = default;
+        Swapchain& operator= (Swapchain&& from) noexcept;
 
         inline int getWidth() const noexcept {
             return _width;
@@ -108,6 +126,6 @@ namespace mvk {
 
         Backbuffer acquireNextImage();
 
-        void resize(int width, int height);
+        void resize(int width, int height);        
     };
 }

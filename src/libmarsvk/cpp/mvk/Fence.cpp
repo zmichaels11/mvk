@@ -7,13 +7,20 @@
 #include "mvk/Util.hpp"
 
 namespace mvk {
-    Fence::~Fence() {
+    Fence::~Fence() noexcept {
         auto dh = getDevice()->getHandle();
 
         vkDestroyFence(dh, _handle, nullptr);
     }
 
-    Device * Fence::getDevice() const {
+    Fence& Fence::operator= (Fence&& from) noexcept {
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_pool, from._pool);
+
+        return *this;
+    }
+
+    Device * Fence::getDevice() const noexcept {
         return getFencePool()->getDevice();
     }
 
@@ -38,7 +45,7 @@ namespace mvk {
         vkWaitForFences(getDevice()->getHandle(), 1, &_handle, VK_TRUE, ~0);
     }
 
-    void Fence::release() {
+    void Fence::release() noexcept {
         getFencePool()->releaseFence(this);
     }
 }

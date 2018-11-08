@@ -5,6 +5,11 @@ wrapper {
 }
 
 model {
+    buildTypes {
+        debug
+        release
+    }
+
     components {
         marsvk (NativeLibrarySpec) {
             sources {
@@ -24,7 +29,9 @@ model {
             binaries.all {
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     cppCompiler.args << "-std=c++14"
-                    cppCompiler.args << '-g'
+                    if (buildTypes.debug == buildType) {
+                        cppCompiler.args << '-g'
+                    }
                 } else if (toolChain instanceof VisualCpp) {
                     cppCompiler.args << "/std:c++14"
                 }

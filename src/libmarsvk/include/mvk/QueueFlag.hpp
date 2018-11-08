@@ -11,11 +11,11 @@ namespace mvk {
         PROTECTED = VK_QUEUE_PROTECTED_BIT
     };
 
-    constexpr QueueFlag operator| (QueueFlag lhs, QueueFlag rhs) {
+    inline constexpr QueueFlag operator| (QueueFlag lhs, QueueFlag rhs) noexcept {
         return static_cast<QueueFlag> (static_cast<unsigned int> (lhs) | static_cast<unsigned int> (rhs));
     }
 
-    constexpr QueueFlag operator& (QueueFlag lhs, QueueFlag rhs) {
+    inline constexpr QueueFlag operator& (QueueFlag lhs, QueueFlag rhs) noexcept {
         return static_cast<QueueFlag> (static_cast<unsigned int> (lhs) & static_cast<unsigned int> (rhs));
     }
 }

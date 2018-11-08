@@ -8,6 +8,7 @@
 
 #include "mvk/Device.hpp"
 #include "mvk/PhysicalDevice.hpp"
+#include "mvk/Surface.hpp"
 #include "mvk/Util.hpp"
 
 namespace mvk {
@@ -16,7 +17,7 @@ namespace mvk {
         constexpr int MAX_QUEUES = 1;
     }
 
-    QueueFamily::QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties) {
+    QueueFamily::QueueFamily(Device * device, int queueFamilyIndex, const VkQueueFamilyProperties& properties) noexcept {
         _device = device;
         _index = queueFamilyIndex;
         _properties = properties;
@@ -36,19 +37,19 @@ namespace mvk {
         _commandPool = nullptr;
     }
 
-    QueueFamily::~QueueFamily() {
+    QueueFamily::~QueueFamily() noexcept {
         _queues.clear();
         detach();
     }
 
-    QueueFlag QueueFamily::getFlags() const {
+    QueueFlag QueueFamily::getFlags() const noexcept {
         return static_cast<QueueFlag> (_properties.queueFlags);
     }
 
-    bool QueueFamily::canPresent(VkSurfaceKHR surface) const {
+    bool QueueFamily::canPresent(const Surface * surface) const {
         VkBool32 isSupported = VK_FALSE;
 
-        Util::vkAssert(vkGetPhysicalDeviceSurfaceSupportKHR(_device->getPhysicalDevice()->getHandle(), _index, surface, &isSupported));
+        Util::vkAssert(vkGetPhysicalDeviceSurfaceSupportKHR(_device->getPhysicalDevice()->getHandle(), _index, surface->getHandle(), &isSupported));
 
         return VK_TRUE == isSupported;
     }
@@ -61,7 +62,7 @@ namespace mvk {
         return _commandPool.get();
     }
 
-    void QueueFamily::detach() {
+    void QueueFamily::detach() noexcept {
         _commandPool = nullptr;
         //TODO: this should destroy thread_local storage
     }

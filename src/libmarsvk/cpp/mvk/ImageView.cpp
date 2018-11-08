@@ -1,5 +1,7 @@
 #include "mvk/ImageView.hpp"
 
+#include <cstdint>
+
 #include <stdexcept>
 
 #include "mvk/Device.hpp"
@@ -18,10 +20,10 @@ namespace mvk {
         imageViewCI.viewType = static_cast<VkImageViewType> (createInfo.viewType);
         imageViewCI.format = static_cast<VkFormat> (createInfo.format);
         imageViewCI.subresourceRange.aspectMask = static_cast<VkImageAspectFlags> (createInfo.subresourceRange.aspectMask);
-        imageViewCI.subresourceRange.baseMipLevel = createInfo.subresourceRange.baseMipLevel;
-        imageViewCI.subresourceRange.levelCount = createInfo.subresourceRange.levelCount;
-        imageViewCI.subresourceRange.baseArrayLayer = createInfo.subresourceRange.baseArrayLayer;
-        imageViewCI.subresourceRange.layerCount = createInfo.subresourceRange.layerCount;
+        imageViewCI.subresourceRange.baseMipLevel = static_cast<std::uint32_t> (createInfo.subresourceRange.baseMipLevel);
+        imageViewCI.subresourceRange.levelCount = static_cast<std::uint32_t> (createInfo.subresourceRange.levelCount);
+        imageViewCI.subresourceRange.baseArrayLayer = static_cast<std::uint32_t> (createInfo.subresourceRange.baseArrayLayer);
+        imageViewCI.subresourceRange.layerCount = static_cast<std::uint32_t> (createInfo.subresourceRange.layerCount);
 
         _handle = VK_NULL_HANDLE;
 
@@ -71,21 +73,29 @@ namespace mvk {
         imageViewCI.viewType = static_cast<VkImageViewType> (createInfo.viewType);
         imageViewCI.format = static_cast<VkFormat> (createInfo.format);
         imageViewCI.subresourceRange.aspectMask = static_cast<VkImageAspectFlags> (createInfo.subresourceRange.aspectMask);
-        imageViewCI.subresourceRange.baseMipLevel = createInfo.subresourceRange.baseMipLevel;
-        imageViewCI.subresourceRange.levelCount = createInfo.subresourceRange.levelCount;
-        imageViewCI.subresourceRange.baseArrayLayer = createInfo.subresourceRange.baseArrayLayer;
-        imageViewCI.subresourceRange.layerCount = createInfo.subresourceRange.layerCount;
+        imageViewCI.subresourceRange.baseMipLevel = static_cast<std::uint32_t> (createInfo.subresourceRange.baseMipLevel);
+        imageViewCI.subresourceRange.levelCount = static_cast<std::uint32_t> (createInfo.subresourceRange.levelCount);
+        imageViewCI.subresourceRange.baseArrayLayer = static_cast<std::uint32_t> (createInfo.subresourceRange.baseArrayLayer);
+        imageViewCI.subresourceRange.layerCount = static_cast<std::uint32_t> (createInfo.subresourceRange.layerCount);
 
         _handle = VK_NULL_HANDLE;
 
         Util::vkAssert(vkCreateImageView(pDevice->getHandle(), &imageViewCI, nullptr, &_handle));
     }
 
-    ImageView::~ImageView() {
+    ImageView::~ImageView() noexcept {
         vkDestroyImageView(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    Device * ImageView::getDevice() const {
+    ImageView& ImageView::operator= (ImageView&& from) noexcept {
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_image, from._image);
+        std::swap(this->_info, from._info);
+
+        return *this;
+    }
+
+    Device * ImageView::getDevice() const noexcept {
         return _image->getDevice();
     }
 }

@@ -15,11 +15,19 @@
 #include "mvk/Util.hpp"
 
 namespace mvk {
-    CommandBuffer::~CommandBuffer() {
+    CommandBuffer& CommandBuffer::operator= (CommandBuffer&& from) noexcept {
+        std::swap(_pool, from._pool);
+        std::swap(_level, from._level);
+        std::swap(_handle, from._handle);
+
+        return *this;
+    }
+
+    CommandBuffer::~CommandBuffer() noexcept {
         vkFreeCommandBuffers(getDevice()->getHandle(), _pool->getHandle(), 1, &_handle);
     }
 
-    Device * CommandBuffer::getDevice() const {
+    Device * CommandBuffer::getDevice() const noexcept {
         return _pool->getDevice();
     }
 
@@ -35,7 +43,19 @@ namespace mvk {
         Util::vkAssert(vkEndCommandBuffer(_handle));
     }
 
-    void CommandBuffer::bindDescriptorSet(const Pipeline * pipeline, int firstSet, const DescriptorSet * descriptorSet) {
+    void CommandBuffer::bindDescriptorSet(
+        const Pipeline * pipeline, int firstSet, const DescriptorSet * descriptorSet, 
+        std::size_t nDynamicOffsets, const int * pDynamicOffsets) noexcept {
+
+        auto bindPoint = static_cast<VkPipelineBindPoint> (pipeline->getBindPoint());
+        auto layout = pipeline->getPipelineLayout()->getHandle();
+        auto set = descriptorSet->getHandle();
+        auto offsets = reinterpret_cast<const uint32_t * > (pDynamicOffsets);
+
+        vkCmdBindDescriptorSets(_handle, bindPoint, layout, static_cast<uint32_t> (firstSet), 1, &set, nDynamicOffsets, offsets);
+    }
+
+    void CommandBuffer::bindDescriptorSet(const Pipeline * pipeline, int firstSet, const DescriptorSet * descriptorSet) noexcept {
         auto bindPoint = static_cast<VkPipelineBindPoint> (pipeline->getBindPoint());
         auto layout = pipeline->getPipelineLayout()->getHandle();
         auto set = descriptorSet->getHandle();
@@ -43,21 +63,21 @@ namespace mvk {
         vkCmdBindDescriptorSets(_handle, bindPoint, layout, static_cast<uint32_t> (firstSet), 1, &set, 0, nullptr);
     }
 
-    void CommandBuffer::bindPipeline(const Pipeline * pipeline) {
+    void CommandBuffer::bindPipeline(const Pipeline * pipeline) noexcept {
         auto bindPoint = static_cast<VkPipelineBindPoint> (pipeline->getBindPoint());
 
         vkCmdBindPipeline(_handle, bindPoint, pipeline->getHandle());
     }
 
-    void CommandBuffer::dispatch(unsigned int groupsX, unsigned int groupsY, unsigned int groupsZ) {
+    void CommandBuffer::dispatch(unsigned int groupsX, unsigned int groupsY, unsigned int groupsZ) noexcept {
         vkCmdDispatch(_handle, groupsX, groupsY, groupsZ);
     }
 
-    void CommandBuffer::dispatchIndirect(const Buffer * buffer, std::ptrdiff_t offset) {
+    void CommandBuffer::dispatchIndirect(const Buffer * buffer, std::ptrdiff_t offset) noexcept {
         vkCmdDispatchIndirect(_handle, buffer->getHandle(), static_cast<VkDeviceSize> (offset));
     }
 
-    void CommandBuffer::beginRenderPass(const Framebuffer * framebuffer, SubpassContents contents) {
+    void CommandBuffer::beginRenderPass(const Framebuffer * framebuffer, SubpassContents contents) noexcept {
         const auto& info = framebuffer->getInfo();
         const auto& attachments = framebuffer->getAttachments();
 
@@ -87,23 +107,23 @@ namespace mvk {
         renderPassBI.framebuffer = framebuffer->getHandle();
         renderPassBI.renderArea.offset.x = 0;
         renderPassBI.renderArea.offset.y = 0;
-        renderPassBI.renderArea.extent.width = info.width;
-        renderPassBI.renderArea.extent.height = info.height;
+        renderPassBI.renderArea.extent.width = static_cast<std::uint32_t> (info.width);
+        renderPassBI.renderArea.extent.height = static_cast<std::uint32_t> (info.height);
         renderPassBI.clearValueCount = clearValues.size();
         renderPassBI.pClearValues = clearValues.data();
         
         vkCmdBeginRenderPass(_handle, &renderPassBI, static_cast<VkSubpassContents> (contents));
     }
 
-    void CommandBuffer::endRenderPass() {
+    void CommandBuffer::endRenderPass() noexcept {
         vkCmdEndRenderPass(_handle);
     }
 
-    void CommandBuffer::nextSubpass(SubpassContents contents) {
+    void CommandBuffer::nextSubpass(SubpassContents contents) noexcept {
         vkCmdNextSubpass(_handle, static_cast<VkSubpassContents> (contents));
     }
 
-    void CommandBuffer::setViewport(float x, float y, float width, float height, float minDepth, float maxDepth) {
+    void CommandBuffer::setViewport(float x, float y, float width, float height, float minDepth, float maxDepth) noexcept {
         auto viewport = VkViewport {};
         viewport.x = x;
         viewport.y = y;
@@ -115,68 +135,71 @@ namespace mvk {
         vkCmdSetViewport(_handle, 0, 1, &viewport);
     }
 
-    void CommandBuffer::setScissor(int x, int y, int width, int height) {
+    void CommandBuffer::setScissor(int x, int y, int width, int height) noexcept {
         auto rect = VkRect2D {};
         rect.offset.x = x;
         rect.offset.y = y;
-        rect.extent.width = width;
-        rect.extent.height = height;
+        rect.extent.width = static_cast<std::uint32_t> (width);
+        rect.extent.height = static_cast<std::uint32_t> (height);
 
         vkCmdSetScissor(_handle, 0, 1, &rect);
     }
 
-    void CommandBuffer::bindVertexBuffer(int binding, const Buffer * buffer, std::ptrdiff_t offset) {
+    void CommandBuffer::bindVertexBuffer(int binding, const Buffer * buffer, std::ptrdiff_t offset) noexcept {
         auto handle = buffer->getHandle();
         auto off = static_cast<VkDeviceSize> (offset);
 
         vkCmdBindVertexBuffers(_handle, binding, 1, &handle, &off);
     }
 
-    void CommandBuffer::bindIndexBuffer(const Buffer * buffer, std::ptrdiff_t offset, IndexType indexType) {
+    void CommandBuffer::bindIndexBuffer(const Buffer * buffer, std::ptrdiff_t offset, IndexType indexType) noexcept {
         auto off = static_cast<VkDeviceSize> (offset);
         auto type = static_cast<VkIndexType> (indexType);
 
         vkCmdBindIndexBuffer(_handle, buffer->getHandle(), off, type);
     }
 
-    void CommandBuffer::draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) {
+    void CommandBuffer::draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) noexcept {
         vkCmdDraw(_handle, static_cast<uint32_t> (vertexCount), static_cast<uint32_t> (instanceCount), static_cast<uint32_t> (firstVertex), static_cast<uint32_t> (firstInstance));
     }
 
-    void CommandBuffer::drawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) {
+    void CommandBuffer::drawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) noexcept {
         vkCmdDrawIndexed(_handle, static_cast<uint32_t> (indexCount), static_cast<uint32_t> (instanceCount), static_cast<uint32_t> (firstIndex), static_cast<uint32_t> (vertexOffset), static_cast<uint32_t> (firstInstance));
     }
 
-    void CommandBuffer::drawIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride) {
+    void CommandBuffer::drawIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride) noexcept {
         vkCmdDrawIndirect(_handle, buffer->getHandle(), static_cast<VkDeviceSize> (offset), static_cast<uint32_t> (drawCount), static_cast<uint32_t> (stride));
     }
 
-    void CommandBuffer::drawIndexedIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride) {
+    void CommandBuffer::drawIndexedIndirect(const Buffer * buffer, std::ptrdiff_t offset, int drawCount, int stride) noexcept {
         vkCmdDrawIndexedIndirect(_handle, buffer->getHandle(), static_cast<VkDeviceSize> (offset), static_cast<uint32_t> (drawCount), static_cast<uint32_t> (stride));
     }
 
-    void CommandBuffer::pushConstants(const Pipeline * pipeline, ShaderStage stages, int offset, int size, const void * data) {
-        vkCmdPushConstants(_handle, pipeline->getPipelineLayout()->getHandle(), static_cast<VkShaderStageFlags> (stages), static_cast<uint32_t> (offset), static_cast<uint32_t> (size), data);
+    void CommandBuffer::pushConstants(const Pipeline * pipeline, ShaderStage stages, std::ptrdiff_t offset, std::size_t size, const void * data) noexcept {
+        vkCmdPushConstants(
+            _handle, 
+            pipeline->getPipelineLayout()->getHandle(), static_cast<VkShaderStageFlags> (stages), 
+            static_cast<uint32_t> (offset), static_cast<uint32_t> (size), data);
     }
 
     void CommandBuffer::copyBufferToImage(
             const Buffer * src, std::ptrdiff_t bufferOffset, 
             const Image * dst, ImageLayout layout, 
             const ImageSubresourceLayers& subresourceRange, 
-            const Offset3D& offset, const Extent3D& extent) {
+            const Offset3D& offset, const Extent3D& extent) noexcept {
 
         auto bufferImageCopy = VkBufferImageCopy {};
         bufferImageCopy.bufferOffset = static_cast<VkDeviceSize> (bufferOffset);
         bufferImageCopy.imageOffset.x = offset.x;
         bufferImageCopy.imageOffset.y = offset.y;
         bufferImageCopy.imageOffset.z = offset.z;
-        bufferImageCopy.imageExtent.width = extent.width;
-        bufferImageCopy.imageExtent.height = extent.height;
-        bufferImageCopy.imageExtent.depth = extent.depth;
+        bufferImageCopy.imageExtent.width = static_cast<std::uint32_t> (extent.width);
+        bufferImageCopy.imageExtent.height = static_cast<std::uint32_t> (extent.height);
+        bufferImageCopy.imageExtent.depth = static_cast<std::uint32_t> (extent.depth);
         bufferImageCopy.imageSubresource.aspectMask = static_cast<VkImageAspectFlags> (subresourceRange.aspectMask);
-        bufferImageCopy.imageSubresource.baseArrayLayer = subresourceRange.baseArrayLayer;
-        bufferImageCopy.imageSubresource.mipLevel = subresourceRange.mipLevel;
-        bufferImageCopy.imageSubresource.layerCount = subresourceRange.layerCount;
+        bufferImageCopy.imageSubresource.baseArrayLayer = static_cast<std::uint32_t> (subresourceRange.baseArrayLayer);
+        bufferImageCopy.imageSubresource.mipLevel = static_cast<std::uint32_t> (subresourceRange.mipLevel);
+        bufferImageCopy.imageSubresource.layerCount = static_cast<std::uint32_t> (subresourceRange.layerCount);
         
         vkCmdCopyBufferToImage(_handle, src->getHandle(), dst->getHandle(), static_cast<VkImageLayout> (layout), 1, &bufferImageCopy);
     }
@@ -186,7 +209,7 @@ namespace mvk {
             const Image * dst, ImageLayout dstLayout,
             const Offset3D& srcOffset, const Offset3D& dstOffset, const Extent3D& extent,
             const ImageSubresourceLayers& srcSubresource,
-            const ImageSubresourceLayers& dstSubresource) {
+            const ImageSubresourceLayers& dstSubresource) noexcept {
 
         auto imageCopy = VkImageCopy {};
         imageCopy.srcOffset.x = srcOffset.x;
@@ -195,17 +218,17 @@ namespace mvk {
         imageCopy.dstOffset.x = dstOffset.x;
         imageCopy.dstOffset.y = dstOffset.y;
         imageCopy.dstOffset.z = dstOffset.z;
-        imageCopy.extent.width = extent.width;
-        imageCopy.extent.height = extent.height;
-        imageCopy.extent.depth = extent.depth;
+        imageCopy.extent.width = static_cast<std::uint32_t> (extent.width);
+        imageCopy.extent.height = static_cast<std::uint32_t> (extent.height);
+        imageCopy.extent.depth = static_cast<std::uint32_t> (extent.depth);
         imageCopy.srcSubresource.aspectMask = static_cast<VkImageAspectFlags> (srcSubresource.aspectMask);
-        imageCopy.srcSubresource.baseArrayLayer = srcSubresource.baseArrayLayer;
-        imageCopy.srcSubresource.layerCount = srcSubresource.layerCount;
-        imageCopy.srcSubresource.mipLevel = srcSubresource.mipLevel;
+        imageCopy.srcSubresource.baseArrayLayer = static_cast<std::uint32_t> (srcSubresource.baseArrayLayer);
+        imageCopy.srcSubresource.layerCount = static_cast<std::uint32_t> (srcSubresource.layerCount);
+        imageCopy.srcSubresource.mipLevel = static_cast<std::uint32_t> (srcSubresource.mipLevel);
         imageCopy.dstSubresource.aspectMask = static_cast<VkImageAspectFlags> (dstSubresource.aspectMask);
-        imageCopy.dstSubresource.baseArrayLayer = dstSubresource.baseArrayLayer;
-        imageCopy.dstSubresource.layerCount = dstSubresource.layerCount;
-        imageCopy.dstSubresource.mipLevel = dstSubresource.mipLevel;
+        imageCopy.dstSubresource.baseArrayLayer = static_cast<std::uint32_t> (dstSubresource.baseArrayLayer);
+        imageCopy.dstSubresource.layerCount = static_cast<std::uint32_t> (dstSubresource.layerCount);
+        imageCopy.dstSubresource.mipLevel = static_cast<std::uint32_t> (dstSubresource.mipLevel);
 
         vkCmdCopyImage(_handle, src->getHandle(), static_cast<VkImageLayout> (srcLayout), dst->getHandle(), static_cast<VkImageLayout> (dstLayout), 1, &imageCopy);
     }
@@ -217,7 +240,7 @@ namespace mvk {
             const Offset3D& dstOffset0, const Offset3D& dstOffset1,
             const ImageSubresourceLayers& srcSubresource, 
             const ImageSubresourceLayers& dstSubresource,
-            Filter filter) {
+            Filter filter) noexcept {
 
         auto imageBlit = VkImageBlit {};
         imageBlit.srcOffsets[0].x = srcOffset0.x;
@@ -233,13 +256,13 @@ namespace mvk {
         imageBlit.dstOffsets[1].y = dstOffset1.y;
         imageBlit.dstOffsets[1].z = dstOffset1.z;
         imageBlit.srcSubresource.aspectMask = static_cast<VkImageAspectFlags> (srcSubresource.aspectMask);
-        imageBlit.srcSubresource.baseArrayLayer = srcSubresource.baseArrayLayer;
-        imageBlit.srcSubresource.layerCount = srcSubresource.layerCount;
-        imageBlit.srcSubresource.mipLevel = srcSubresource.mipLevel;
+        imageBlit.srcSubresource.baseArrayLayer = static_cast<std::uint32_t> (srcSubresource.baseArrayLayer);
+        imageBlit.srcSubresource.layerCount = static_cast<std::uint32_t> (srcSubresource.layerCount);
+        imageBlit.srcSubresource.mipLevel = static_cast<std::uint32_t> (srcSubresource.mipLevel);
         imageBlit.dstSubresource.aspectMask = static_cast<VkImageAspectFlags> (dstSubresource.aspectMask);
-        imageBlit.dstSubresource.baseArrayLayer = dstSubresource.baseArrayLayer;
-        imageBlit.dstSubresource.layerCount = dstSubresource.layerCount;
-        imageBlit.dstSubresource.mipLevel = dstSubresource.mipLevel;
+        imageBlit.dstSubresource.baseArrayLayer = static_cast<std::uint32_t> (dstSubresource.baseArrayLayer);
+        imageBlit.dstSubresource.layerCount = static_cast<std::uint32_t> (dstSubresource.layerCount);
+        imageBlit.dstSubresource.mipLevel = static_cast<std::uint32_t> (dstSubresource.mipLevel);
 
         vkCmdBlitImage(_handle, src->getHandle(), static_cast<VkImageLayout> (srcLayout), dst->getHandle(), static_cast<VkImageLayout> (dstLayout), 1, &imageBlit, static_cast<VkFilter> (filter));
     }
@@ -249,7 +272,7 @@ namespace mvk {
             const Image * dst, ImageLayout dstLayout,
             const ImageSubresourceLayers& srcSubresource,
             const ImageSubresourceLayers& dstSubresource,
-            Filter filter) {
+            Filter filter) noexcept {
 
         auto srcOffset1 = Offset3D{};
         srcOffset1.x = src->getInfo().extent.width;
@@ -268,7 +291,7 @@ namespace mvk {
             const Image * image, 
             ImageLayout oldLayout, ImageLayout newLayout,
             PipelineStageFlag srcStageMask, PipelineStageFlag dstStageMask,
-            AccessFlag srcAccess, AccessFlag dstAccess) {
+            AccessFlag srcAccess, AccessFlag dstAccess) noexcept {
 
         auto imageMemoryBarrier = VkImageMemoryBarrier {};
         imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -283,10 +306,10 @@ namespace mvk {
         auto subresourceRange = image->getFullRange();
 
         imageMemoryBarrier.subresourceRange.aspectMask = static_cast<VkImageAspectFlags> (subresourceRange.aspectMask);
-        imageMemoryBarrier.subresourceRange.baseArrayLayer = subresourceRange.baseArrayLayer;
-        imageMemoryBarrier.subresourceRange.layerCount = subresourceRange.layerCount;
-        imageMemoryBarrier.subresourceRange.baseMipLevel = subresourceRange.baseMipLevel;
-        imageMemoryBarrier.subresourceRange.levelCount = subresourceRange.levelCount;
+        imageMemoryBarrier.subresourceRange.baseArrayLayer = static_cast<std::uint32_t> (subresourceRange.baseArrayLayer);
+        imageMemoryBarrier.subresourceRange.layerCount = static_cast<std::uint32_t> (subresourceRange.layerCount);
+        imageMemoryBarrier.subresourceRange.baseMipLevel = static_cast<std::uint32_t> (subresourceRange.baseMipLevel);
+        imageMemoryBarrier.subresourceRange.levelCount = static_cast<std::uint32_t> (subresourceRange.levelCount);
 
         vkCmdPipelineBarrier(_handle, static_cast<VkPipelineStageFlags> (srcStageMask), static_cast<VkPipelineStageFlags> (dstStageMask), 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
     }
@@ -294,7 +317,7 @@ namespace mvk {
     void CommandBuffer::copyBuffer(
             const Buffer * src, const Buffer * dst,
             std::ptrdiff_t srcOffset, std::ptrdiff_t dstOffset,
-            std::size_t size) {
+            std::size_t size) noexcept {
 
         auto region = VkBufferCopy {};
         region.srcOffset = static_cast<VkDeviceSize> (srcOffset);
@@ -312,7 +335,7 @@ namespace mvk {
             std::size_t bufferMemoryBarrierCount,
             const BufferMemoryBarrier * pBufferMemoryBarriers,
             std::size_t imageMemoryBarrierCount,
-            const ImageMemoryBarrier * pImageMemoryBarriers) {
+            const ImageMemoryBarrier * pImageMemoryBarriers) noexcept {
 
         auto memoryBarriers = std::vector<VkMemoryBarrier> ();
         memoryBarriers.reserve(memoryBarrierCount);
@@ -329,7 +352,7 @@ namespace mvk {
         auto bufferMemoryBarriers = std::vector<VkBufferMemoryBarrier> ();
         bufferMemoryBarriers.reserve(bufferMemoryBarrierCount);
 
-        std::for_each(pBufferMemoryBarriers, pBufferMemoryBarriers + memoryBarrierCount, [&](const auto& barrier) {
+        std::for_each(pBufferMemoryBarriers, pBufferMemoryBarriers + bufferMemoryBarrierCount, [&](const auto& barrier) {
             auto bufferMemoryBarrier = VkBufferMemoryBarrier {};
             bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
             bufferMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags> (barrier.srcAccessMask);

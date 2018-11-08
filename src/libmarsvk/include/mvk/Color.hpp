@@ -1,15 +1,17 @@
 #pragma once
 
 namespace mvk {
+    //! A RGBA color structure.
     struct Color {
-        float red;
-        float green;
-        float blue;
-        float alpha;
+        float red;      /*!< The Red component. */
+        float green;    /*!< The Green component. */
+        float blue;     /*!< The Blue component. */
+        float alpha;    /*!< The Alpha component. */
     };
 
     namespace colors {
-        inline constexpr Color opaqueWhite() {
+        //! Constructs a Color object that represents Opaque White.
+        inline constexpr Color opaqueWhite() noexcept {
             auto out = Color {};
             out.red = 1.0F;
             out.green = 1.0F;
@@ -19,7 +21,8 @@ namespace mvk {
             return out;
         }
 
-        inline constexpr Color transparentWhite() {
+        //! Constructs a Color object that represents transparent White.
+        inline constexpr Color transparentWhite() noexcept {
             auto out = Color {};
             out.red = 1.0F;
             out.green = 1.0F;
@@ -28,11 +31,13 @@ namespace mvk {
             return out;
         }
 
-        inline constexpr Color transparentBlack() {
+        //! Constructs a Color object that represents transparent Black.
+        inline constexpr Color transparentBlack() noexcept {
             return Color {};
         }
 
-        inline constexpr Color opaqueBlack() {
+        //! Constructs a Color object that represents opaque Black.
+        inline constexpr Color opaqueBlack() noexcept {
             auto out = Color {};
             out.alpha = 1.0F;
 

@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include <exception>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -105,9 +107,13 @@ namespace mvk {
         _samplerCache = std::make_unique<SamplerCache> (this);
     }
 
-    Device::~Device() {
-        waitIdle();
-
+    Device::~Device() noexcept {
+        try {
+            waitIdle();
+        } catch (const std::exception& ex) {
+            std::cerr << ex.what() << std::endl;
+        }
+        
         _samplerCache = nullptr;
         _pipelineLayoutCache = nullptr;
         _pipelineCache = nullptr;
@@ -120,6 +126,23 @@ namespace mvk {
         vmaDestroyAllocator(_allocator);
 
         vkDestroyDevice(_handle, nullptr);
+    }
+
+    Device& Device::operator= (Device&& from) noexcept {
+        std::swap(this->_allocator, from._allocator);
+        std::swap(this->_descriptorSetLayoutCache, from._descriptorSetLayoutCache);
+        std::swap(this->_enabledExtensions, from._enabledExtensions);
+        std::swap(this->_fencePool, from._fencePool);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_physicalDevice, from._physicalDevice);
+        std::swap(this->_pipelineCache, from._pipelineCache);
+        std::swap(this->_pipelineLayoutCache, from._pipelineLayoutCache);
+        std::swap(this->_queueFamilies, from._queueFamilies);
+        std::swap(this->_queueFamilyCount, from._queueFamilyCount);
+        std::swap(this->_samplerCache, from._samplerCache);
+        std::swap(this->_semaphorePool, from._semaphorePool);
+
+        return *this;
     }
 
     ShaderModule * Device::getShaderModule(const ShaderModule::CreateInfo& createInfo) {
@@ -137,7 +160,7 @@ namespace mvk {
         return out;
     }
 
-    std::vector<QueueFamily * > Device::getQueueFamilies() const {
+    std::vector<QueueFamily * > Device::getQueueFamilies() const noexcept {
         auto out = std::vector<QueueFamily *>();
 
         out.reserve(_queueFamilyCount);

@@ -12,11 +12,12 @@
 #include "mvk/Image.hpp"
 #include "mvk/PhysicalDevice.hpp"
 #include "mvk/QueueFamily.hpp"
+#include "mvk/Surface.hpp"
 #include "mvk/Util.hpp"
 
 namespace mvk {
     namespace {
-        VkSurfaceFormatKHR chooseFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats, Format format, ColorSpace colorSpace) {
+        VkSurfaceFormatKHR chooseFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats, Format format, ColorSpace colorSpace) noexcept {
             if (1 == availableFormats.size() && VK_FORMAT_UNDEFINED == availableFormats[0].format) {
                 auto defFormat = VkSurfaceFormatKHR {};
                 defFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
@@ -34,10 +35,10 @@ namespace mvk {
             return availableFormats[0];
         }
 
-        VkPresentModeKHR choosePresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes, VkPresentModeKHR presentMode) {
-            for (const auto& presentMode : availablePresentModes) {
-                if (presentMode == presentMode) {
-                    return presentMode;
+        VkPresentModeKHR choosePresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes, VkPresentModeKHR preferred) noexcept {
+            for (const auto& supported : availablePresentModes) {
+                if (preferred == supported) {
+                    return preferred;
                 }
             }
 
@@ -45,7 +46,7 @@ namespace mvk {
         }
     }
 
-    Swapchain::Support::Support(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) {
+    Swapchain::Support::Support(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) noexcept {
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
 
         uint32_t formatCount = 0;
@@ -65,10 +66,23 @@ namespace mvk {
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data());
     }
 
-    Swapchain::~Swapchain() {
+    Swapchain::~Swapchain() noexcept {
         if (VK_NULL_HANDLE != _handle) {
             vkDestroySwapchainKHR(getDevice()->getHandle(), _handle, nullptr);
         }
+    }
+
+    Swapchain& Swapchain::operator= (Swapchain&& from) noexcept {
+        std::swap(this->_device, from._device);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_height, from._height);
+        std::swap(this->_images, from._images);
+        std::swap(this->_info, from._info);
+        std::swap(this->_presentMode, from._presentMode);
+        std::swap(this->_support, from._support);
+        std::swap(this->_width, from._width);
+
+        return *this;
     }
 
     Swapchain::Backbuffer Swapchain::acquireNextImage() {
@@ -104,10 +118,10 @@ namespace mvk {
         auto pDevice = getDevice();
         auto pPhysicalDevice = pDevice->getPhysicalDevice();
 
-        _support = Support(pPhysicalDevice->getHandle(), _info.surface);
+        _support = Support(pPhysicalDevice->getHandle(), _info.surface->getHandle());
 
         auto surfaceFormat = chooseFormat(_support.surfaceFormats, _info.surfaceFormat.format, _info.surfaceFormat.colorSpace);
-        auto presentMode = choosePresentMode(_support.presentModes, VK_PRESENT_MODE_FIFO_RELAXED_KHR);
+        auto presentMode = choosePresentMode(_support.presentModes, static_cast<VkPresentModeKHR> (_info.presentMode));
 
         uint32_t imageCount = 0;
 
@@ -142,7 +156,7 @@ namespace mvk {
 
         auto swapchainCI = VkSwapchainCreateInfoKHR {};
         swapchainCI.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        swapchainCI.surface = _info.surface;
+        swapchainCI.surface = _info.surface->getHandle();
         swapchainCI.minImageCount = imageCount;
         swapchainCI.imageFormat = surfaceFormat.format;
         swapchainCI.imageColorSpace = surfaceFormat.colorSpace;

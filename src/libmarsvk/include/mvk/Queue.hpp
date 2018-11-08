@@ -2,7 +2,9 @@
 
 #include "volk.h"
 
+#include <memory>
 #include <queue>
+#include <utility>
 #include <vector>
 
 #include "mvk/AccessFlag.hpp"
@@ -56,14 +58,22 @@ namespace mvk {
 
         InternalCommandBuffer acquireCommandBuffer();
 
+        Queue(const Queue&) = delete;
+        Queue& operator= (const Queue&) = delete;
+
     public:
+        Queue() noexcept:
+            _handle(VK_NULL_HANDLE),
+            _queueIndex(-1),
+            _queueFamily(nullptr) {}
+            
         Queue(QueueFamily * queueFamily, int queueIndex);
 
-        Queue(const Queue&) = delete;
-
-        Queue(Queue&&) = default;
-
-        Queue& operator= (const Queue&) = delete;
+        Queue(Queue&& from) noexcept:
+            _handle(std::exchange(from._handle, nullptr)),
+            _queueIndex(std::move(from._queueIndex)),
+            _queueFamily(std::move(from._queueFamily)),
+            _commandBuffers(std::move(from._commandBuffers)) {}
 
         Queue& operator= (Queue&&) = default;
 
@@ -75,11 +85,15 @@ namespace mvk {
             return _queueIndex;
         }
 
-        Device * getDevice() const;
+        Device * getDevice() const noexcept;
 
         void waitIdle();
 
         void submit(const CommandBuffer * command, const Fence * fence = nullptr);
+
+        inline void submit(const std::unique_ptr<CommandBuffer>& command, const Fence * fence = nullptr) {
+            submit(command.get(), fence);
+        }
 
         void submit(const SubmitInfo& submitInfo, const Fence * fence = nullptr);
 

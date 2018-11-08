@@ -1,5 +1,7 @@
 #include "mvk/Framebuffer.hpp"
 
+#include <cstddef>
+
 #include "mvk/Device.hpp"
 #include "mvk/RenderPass.hpp"
 
@@ -21,18 +23,27 @@ namespace mvk {
         framebufferCI.renderPass = renderPass->getHandle();
         framebufferCI.attachmentCount = vkAttachments.size();
         framebufferCI.pAttachments = vkAttachments.data();
-        framebufferCI.width = static_cast<uint32_t> (createInfo.width);
-        framebufferCI.height = static_cast<uint32_t> (createInfo.height);
-        framebufferCI.layers = static_cast<uint32_t> (createInfo.layers);
+        framebufferCI.width = static_cast<std::uint32_t> (createInfo.width);
+        framebufferCI.height = static_cast<std::uint32_t> (createInfo.height);
+        framebufferCI.layers = static_cast<std::uint32_t> (createInfo.layers);
 
         Util::vkAssert(vkCreateFramebuffer(renderPass->getDevice()->getHandle(), &framebufferCI, nullptr, &_handle));
     }
 
-    Framebuffer::~Framebuffer() {
+    Framebuffer::~Framebuffer() noexcept {
         vkDestroyFramebuffer(getDevice()->getHandle(), _handle, nullptr);
     }
 
-    Device * Framebuffer::getDevice() const {
+    Framebuffer& Framebuffer::operator= (Framebuffer&& from) noexcept {
+        std::swap(this->_attachments, from._attachments);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_info, from._info);
+        std::swap(this->_renderPass, from._renderPass);
+
+        return *this;
+    }
+
+    Device * Framebuffer::getDevice() const noexcept {
         return _renderPass->getDevice();
     }
 }

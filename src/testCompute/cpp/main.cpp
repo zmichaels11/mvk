@@ -14,8 +14,8 @@ int main(int argc, char ** argv) {
     //mvk::Instance::enableLayer(mvk::InstanceLayer::API_DUMP);
 
     auto& instance = mvk::Instance::getCurrent();
-    auto pPhysicalDevice = instance.getPhysicalDevice(0);
-    auto pDevice = pPhysicalDevice->createDevice();
+    auto& physicalDevice = instance.getPhysicalDevice(0);
+    auto pDevice = physicalDevice.createDevice();
 
     auto bufferCI = mvk::Buffer::CreateInfo {};
     bufferCI.usage = mvk::BufferUsageFlag::STORAGE_BUFFER;

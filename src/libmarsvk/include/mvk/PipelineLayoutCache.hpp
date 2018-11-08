@@ -22,10 +22,19 @@ namespace mvk {
         Device * _device;
         std::vector<std::unique_ptr<Layout>> _layouts;
 
+        PipelineLayoutCache(const PipelineLayoutCache&) = delete;
+        PipelineLayoutCache& operator= (const PipelineLayoutCache&) = delete;
+
     public:
-        PipelineLayoutCache(Device * device) :
-            _device(device),
-            _layouts() {}
+        PipelineLayoutCache() noexcept:
+            _device(nullptr) {}
+
+        PipelineLayoutCache(Device * device) noexcept:
+            _device(device) {}
+
+        PipelineLayoutCache(PipelineLayoutCache&&) = default;
+
+        PipelineLayoutCache& operator= (PipelineLayoutCache&& from) = default;
         
         void releasePipelineLayout(PipelineLayout * layout);
 

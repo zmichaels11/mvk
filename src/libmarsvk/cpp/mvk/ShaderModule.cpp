@@ -18,7 +18,7 @@
 
 namespace mvk {
     namespace {
-        std::size_t getFileSize(const char * fileName) {
+        std::size_t getFileSize(const char * fileName) noexcept {
             struct stat st;
 
             stat(fileName, &st);
@@ -63,9 +63,17 @@ namespace mvk {
         close(fd);
     }
 
-    ShaderModule::~ShaderModule() {
+    ShaderModule::~ShaderModule() noexcept {
         if (VK_NULL_HANDLE != _handle) {
             vkDestroyShaderModule(_device->getHandle(), _handle, nullptr);
         }
+    }
+
+    ShaderModule& ShaderModule::operator= (ShaderModule&& from) noexcept {
+        std::swap(this->_device, from._device);
+        std::swap(this->_handle, from._handle);
+        std::swap(this->_info, from._info);
+
+        return *this;
     }
 }
